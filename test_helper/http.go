@@ -14,6 +14,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type Response map[string]interface{}
+
+func ParseJson(body *bytes.Buffer) Response {
+	var resp Response
+	json.NewDecoder(body).Decode(&resp)
+	return resp
+}
+
 type RequestFunc func(*gin.Context)
 
 // response handling func type
