@@ -28,7 +28,7 @@ func GetRouter(withTemplates bool) *gin.Engine {
 }
 
 // Helper function to process a request and test its response
-func TestHTTPResponse(t *testing.T, r *gin.Engine, req *http.Request, f func(w *httptest.ResponseRecorder) bool) {
+func TestHTTPResponse(t *testing.T, r *gin.Engine, req *http.Request, f func(w *httptest.ResponseRecorder)) {
 
 	// Create a response recorder
 	w := httptest.NewRecorder()
@@ -36,7 +36,5 @@ func TestHTTPResponse(t *testing.T, r *gin.Engine, req *http.Request, f func(w *
 	// Create the service and process the above request.
 	r.ServeHTTP(w, req)
 
-	if !f(w) {
-		t.Fail()
-	}
+	f(w)
 }
