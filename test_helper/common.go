@@ -1,6 +1,6 @@
 package test_helper
 
-// This function is used for setup before executing the test functions
+// Borrowed from https://semaphoreci.com/community/tutorials/building-go-web-applications-and-microservices-using-gin
 import (
 	"net/http"
 	"net/http/httptest"
