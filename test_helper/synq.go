@@ -79,7 +79,11 @@ func SynqStub() *httptest.Server {
 						w.WriteHeader(http.StatusBadRequest)
 						resp = []byte(ke)
 					} else {
-						resp, _ = ioutil.ReadFile(sample_dir + "video.json")
+						if video_id == LIVE_VIDEO_ID {
+							resp, _ = ioutil.ReadFile(sample_dir + "video_live.json")
+						} else {
+							resp, _ = ioutil.ReadFile(sample_dir + "video.json")
+						}
 					}
 				case "/v1/video/create":
 					resp, _ = ioutil.ReadFile(sample_dir + "new_video.json")
