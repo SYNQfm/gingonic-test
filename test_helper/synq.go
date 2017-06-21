@@ -71,6 +71,7 @@ func SynqStub() *httptest.Server {
 				switch r.RequestURI {
 				case "/v1/video/details":
 					video_id := v.Get("video_id")
+					log.Println("in video details with video " + video_id)
 					ke = validVideo(video_id)
 					if ke != "" {
 						w.WriteHeader(http.StatusBadRequest)
