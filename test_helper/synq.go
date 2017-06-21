@@ -47,7 +47,7 @@ func validKey(key string) string {
 func validVideo(id string) string {
 	if len(id) != 32 {
 		return INVALID_UUID
-	} else if id != VIDEO_ID || id != LIVE_VIDEO_ID {
+	} else if id != VIDEO_ID && id != LIVE_VIDEO_ID {
 		return VIDEO_NOT_FOUND
 	}
 	return ""
@@ -56,7 +56,7 @@ func validVideo(id string) string {
 func SynqStub() *httptest.Server {
 	var resp []byte
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("here in synq response", r.RequestURI)
+		log.Println("processing synq response")
 		testReqs = append(testReqs, r)
 		if r.Method == "POST" {
 			bytes, _ := ioutil.ReadAll(r.Body)
@@ -65,9 +65,11 @@ func SynqStub() *httptest.Server {
 			key := v.Get("api_key")
 			ke := validKey(key)
 			if ke != "" {
+				log.Println("fail with " + ke)
 				w.WriteHeader(http.StatusBadRequest)
 				resp = []byte(ke)
 			} else {
+				log.Println("handling uri " + r.RequestURI)
 				switch r.RequestURI {
 				case "/v1/video/details":
 					video_id := v.Get("video_id")
