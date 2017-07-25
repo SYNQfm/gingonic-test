@@ -11,6 +11,7 @@ import (
 var sample_dir = "sample/"
 
 var testReqs []*http.Request
+var testValues []url.Values
 var testServer *httptest.Server
 
 const (
@@ -33,6 +34,10 @@ func SetupServer() string {
 	testReqs = testReqs[:0]
 	testServer = SynqStub()
 	return testServer.URL
+}
+
+func GetReqs() ([]*http.Request, []url.Values) {
+	return testReqs, testValues
 }
 
 func validKey(key string) string {
@@ -62,6 +67,7 @@ func SynqStub() *httptest.Server {
 			bytes, _ := ioutil.ReadAll(r.Body)
 			//Parse response body
 			v, _ := url.ParseQuery(string(bytes))
+			testValues = append(testValues, v)
 			key := v.Get("api_key")
 			ke := validKey(key)
 			if ke != "" {
