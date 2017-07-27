@@ -32,6 +32,7 @@ func SetupServer() string {
 		testServer.Close()
 	}
 	testReqs = testReqs[:0]
+	testValues = testValues[:0]
 	testServer = SynqStub()
 	return testServer.URL
 }
