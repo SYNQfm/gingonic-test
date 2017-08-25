@@ -18,6 +18,7 @@ const (
 	VIDEO_ID          = "45d4063d00454c9fb21e5186a09c3115"
 	VIDEO_ID2         = "55d4062f99454c9fb21e5186a09c2115"
 	PROJECT_ID        = "1abfe1b849154082993f2fce78a16fda"
+	PROJECT_ID2       = "963bab6186a352b6c0e9de5d29418be3"
 	LIVE_VIDEO_ID     = "ec37c42b4aab46f18003b33c66e5e641"
 	API_KEY           = "aba179c14ab349e0bb0d12b7eca5fa24"
 	API_KEY2          = "cba179c14ab349e0bb0d12b7eca5fa25"
