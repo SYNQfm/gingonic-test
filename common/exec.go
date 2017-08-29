@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"os"
 	"os/exec"
 )
 
@@ -19,18 +20,15 @@ type ExecObj struct {
 	Err     SynqError
 }
 
-func NewExec(command string, errObj ...SynqError) ExecObj {
-	cmd := exec.Command(command)
+func NewExec(command string, args ...string) ExecObj {
+	cmd := exec.Command(command, args...)
+	cmd.Env = os.Environ()
 	obj := ExecObj{Cmd: cmd}
-	if len(errObj) > 0 {
-		obj.Err = errObj[0]
-	} else {
-		// create a default SynqError
-		obj.Err = SynqError{
-			Name:    "exec_error",
-			Url:     "http://docs.synq.fm/api/v1/errors/",
-			Message: "An error occured while running your script",
-		}
+	// create a default SynqError
+	obj.Err = SynqError{
+		Name:    "exec_error",
+		Url:     "http://docs.synq.fm/api/v1/errors/",
+		Message: "An error occured while running your script",
 	}
 	return obj
 }
