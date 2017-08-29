@@ -15,13 +15,23 @@ type ExecObj struct {
 	stdin   io.WriteCloser
 	ReadOut []byte
 	ReadErr []byte
-	Err     error
+	RunErr  error
+	Err     SynqError
 }
 
-func NewExec(command string) ExecObj {
+func NewExec(command string, errObj ...SynqError) ExecObj {
 	cmd := exec.Command(command)
 	obj := ExecObj{Cmd: cmd}
-	obj.Err = obj.Open()
+	if len(errObj) > 0 {
+		obj.Err = errObj[0]
+	} else {
+		// create a default SynqError
+		obj.Err = SynqError{
+			Name:    "exec_error",
+			Url:     "http://docs.synq.fm/api/v1/errors/",
+			Message: "An error occured while running your script",
+		}
+	}
 	return obj
 }
 
@@ -65,35 +75,38 @@ func (e *ExecObj) Read() error {
 }
 
 func (e *ExecObj) Exec(fn func(io.WriteCloser)) {
-	e.Open()
+	if err := e.Open(); err != nil {
+		e.RunErr = err
+		return
+	}
 	if err := e.Cmd.Start(); err != nil {
-		e.Err = err
+		e.RunErr = err
 		return
 	}
 
 	fn(e.stdin)
 
 	if err := e.stdin.Close(); err != nil {
-		e.Err = err
+		e.RunErr = err
 		return
 	}
 
 	if err := e.Read(); err != nil {
-		e.Err = err
+		e.RunErr = err
 		return
 	}
 
 	if err := e.Cmd.Wait(); err != nil {
-		e.Err = err
+		e.RunErr = err
 		return
 	}
 }
 
 func (e *ExecObj) ErrorMsg() string {
-	if e.Err == nil {
+	if e.RunErr == nil {
 		return ""
 	}
-	return e.Err.Error()
+	return e.RunErr.Error()
 }
 
 func (e *ExecObj) StatusCode() int {
@@ -107,34 +120,23 @@ func (e *ExecObj) StatusBody() []byte {
 	if e.ErrorMsg() == "" {
 		return e.ReadOut
 	}
-	return e.buildJsonError()
+	return e.MarshalError()
 }
 
-func (e *ExecObj) buildJsonError() (body []byte) {
+func (e *ExecObj) MarshalError() (body []byte) {
 	// TODO(mastensg): Don't do string matching, but rather something with this:
 	// TODO(mastensg): https://golang.org/pkg/syscall/#WaitStatus.ExitStatus
 	if e.ErrorMsg() != "exit status 1" {
 		log.Println("stdout:", string(e.ReadOut))
 		log.Println("stderr:", string(e.ReadErr))
-		return body
+		e.Err.Message = e.ErrorMsg()
+	} else {
+		jsErr := json.RawMessage(e.ReadErr)
+		e.Err.Details = &jsErr
 	}
-
-	javascriptError := json.RawMessage(e.ReadErr)
-
-	synqError := struct {
-		Name    string           `json:"name"`
-		Message string           `json:"message"`
-		Url     string           `json:"url"`
-		Details *json.RawMessage `json:"details"`
-	}{
-		Name:    "javascript_query",
-		Message: "An error occured while processing your JavaScript query.",
-		Url:     "http://docs.synq.fm/api/v1/errors/javascript_query",
-		Details: &javascriptError,
-	}
-
-	body, err := json.MarshalIndent(synqError, "", "    ")
+	body, err := json.MarshalIndent(e.Err, "", "    ")
 	if err != nil {
+		log.Println("error marshaling data ", err.Error())
 		return body
 	}
 	return body
