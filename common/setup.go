@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/SYNQfm/SYNQ-Golang/synq"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -17,6 +18,19 @@ func SetupDB(def_url ...string) *sqlx.DB {
 	}
 	dbaddr := ParseDatabaseUrl(db_url)
 	return sqlx.MustConnect("postgres", dbaddr)
+}
+
+func SetupSynq() synq.Api {
+	key := os.Getenv("SYNQ_API_KEY")
+	if key == "" {
+		log.Println("WARNING : no Synq API key specified")
+	}
+	sApi := synq.New(key)
+	url := os.Getenv("SYNQ_API_URL")
+	if url != "" {
+		sApi.Url = url
+	}
+	return sApi
 }
 
 // this parses the database url and returns it in the format sqlx.DB expects
