@@ -70,6 +70,10 @@ func CopyFile(src string, dst string) (err error) {
 		if !(dfi.Mode().IsRegular()) {
 			return fmt.Errorf("CopyFile: non-regular destination file %s (%q)", dfi.Name(), dfi.Mode().String())
 		}
+
+	}
+	if os.SameFile(sfi, dfi) {
+		return
 	}
 	err = copyFileContents(src, dst)
 	return
