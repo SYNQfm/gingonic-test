@@ -100,6 +100,8 @@ func SynqStub() *httptest.Server {
 					resp, _ = ioutil.ReadFile(sample_dir + "upload.json")
 				case "/v1/video/update":
 					resp, _ = ioutil.ReadFile(sample_dir + "video_update.json")
+				case "/v1/video/query":
+					resp, _ = ioutil.ReadFile(sample_dir + "query.json")
 				default:
 					w.WriteHeader(http.StatusBadRequest)
 					resp = []byte(HTTP_NOT_FOUND)
