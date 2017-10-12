@@ -14,7 +14,7 @@ func DownloadChunk(url string, size int64) (body []byte, err error) {
 	req.Header.Add("Range", fmt.Sprintf("bytes=0-%d", size))
 	resp, _ := client.Do(req)
 	if resp.StatusCode != 200 {
-		return body, common.NewError("could not retrieve url : %d", resp.StatusCode)
+		return body, NewError("could not retrieve url : %d", resp.StatusCode)
 	}
 	body, _ = ioutil.ReadAll(resp.Body)
 	return body, nil
