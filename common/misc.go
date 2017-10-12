@@ -1,29 +1,28 @@
 package common
 
 import (
+	"fmt"
 	"strings"
 	"time"
 )
 
 type Ret struct {
-	Label     string
-	Total     int
-	Count     int
-	Skipped   int
-	Errored   int
-	isErrored bool
-	Start     time.Date
+	Label   string
+	Total   int
+	Count   int
+	Skipped int
+	Errored int
+	Start   time.Date
 }
 
 func NewRet(label string) Ret {
 	return Ret{
-		Label:     label,
-		Count:     0,
-		Total:     0,
-		Skipped:   0,
-		Errored:   0,
-		isErrored: false,
-		Start:     time.Now(),
+		Label:   label,
+		Count:   0,
+		Total:   0,
+		Skipped: 0,
+		Errored: 0,
+		Start:   time.Now(),
 	}
 }
 
@@ -40,4 +39,13 @@ func (r *Ret) Add(type_ string) {
 		"skip":
 		r.Skipped = r.Skipped + 1
 	}
+}
+
+func (r *Ret) IsErrored() bool {
+	return r.Total == r.Errored
+
+}
+
+func (r *Ret) String() string {
+	return fmt.Sprintf("for %s, processed %d/%d, skipped %d, errored %d", r.Label, r.Count, r.Total, r.Skipped, r.Errored)
 }
