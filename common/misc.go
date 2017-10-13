@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"time"
 )
@@ -80,7 +79,6 @@ func (r *Ret) Lt(type_ string, ct int) bool {
 func (r *Ret) String() string {
 	str := fmt.Sprintf("for %s, processed %d/%d", r.Label, r.Value("ct"), r.Value("total"))
 	for k, v := range r.CountMap {
-		log.Println(k)
 		if k == "count" || k == "total" {
 			continue
 		}
