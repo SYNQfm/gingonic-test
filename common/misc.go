@@ -2,55 +2,93 @@ package common
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 )
 
 type Ret struct {
-	Label   string
-	Total   int
-	Count   int
-	Skipped int
-	Already int
-	Errored int
-	Error   error
-	Start   time.Time
+	Label    string
+	CountMap map[string]int
+	Error    error
+	Start    time.Time
 }
 
 func NewRet(label string) Ret {
 	return Ret{
-		Label:   label,
-		Count:   0,
-		Total:   0,
-		Already: 0,
-		Skipped: 0,
-		Errored: 0,
-		Error:   nil,
-		Start:   time.Now(),
+		Label:    label,
+		CountMap: make(map[string]int),
+		Error:    nil,
+		Start:    time.Now(),
 	}
+}
+
+func ParseType(type_ string) string {
+	t := strings.ToLower(type_)
+	switch t {
+	case "error":
+		t = "errored"
+	case "skip":
+		t = "skipped"
+	case "ct":
+		t = "count"
+	}
+	return t
 }
 
 func (r *Ret) Add(type_ string) {
-	switch strings.ToLower(type_) {
-	case "count":
-		r.Count = r.Count + 1
-	case "total":
-		r.Total = r.Total + 1
-	case "errored",
-		"error":
-		r.Errored = r.Errored + 1
-	case "already":
-		r.Already = r.Already + 1
-	case "skipped",
-		"skip":
-		r.Skipped = r.Skipped + 1
+	t := ParseType(type_)
+	if _, ok := r.CountMap[t]; !ok {
+		r.CountMap[t] = 0
 	}
+	r.CountMap[t] = r.CountMap[t] + 1
 }
 
 func (r *Ret) IsErrored() bool {
-	return r.Total == r.Errored
+	return r.Value("total") == r.Value("errored")
+}
+
+func (r *Ret) Value(type_ string) int {
+	t := ParseType(type_)
+	c, ok := r.CountMap[t]
+	if !ok {
+		c = 0
+	}
+	return c
+}
+
+func (r *Ret) Eq(type_ string, ct int) bool {
+	return r.Value(type_) == ct
+}
+
+func (r *Ret) Gte(type_ string, ct int) bool {
+	return r.Value(type_) >= ct
+}
+
+func (r *Ret) Gt(type_ string, ct int) bool {
+	return r.Value(type_) > ct
+}
+
+func (r *Ret) Lte(type_ string, ct int) bool {
+	return r.Value(type_) <= ct
+}
+
+func (r *Ret) Lt(type_ string, ct int) bool {
+	return r.Value(type_) < ct
 }
 
 func (r *Ret) String() string {
-	return fmt.Sprintf("for %s, processed %d/%d, skipped %d, errored %d", r.Label, r.Count, r.Total, r.Skipped, r.Errored)
+	str := fmt.Sprintf("for %s, processed %d/%d", r.Label, r.Value("ct"), r.Value("total"))
+	for k, v := range r.CountMap {
+		log.Println(k)
+		if k == "count" || k == "total" {
+			continue
+		}
+		str = str + fmt.Sprintf(", %s %d", k, v)
+	}
+	str = str + "\n"
+	dur := time.Since(r.Start)
+	ms := int(dur / time.Millisecond)
+	str = str + fmt.Sprintf("took %d ms", ms)
+	return str
 }
