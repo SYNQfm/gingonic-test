@@ -17,6 +17,8 @@ jobs:
           command: |
             go get github.com/gin-gonic/gin
             go get github.com/SYNQfm/SYNQ-Golang/synq
+            go get github.com/stretchr/testify/assert
+            go get github.com/stretchr/testify/require
       - run:
           name: Run Golang Tests
           command: |
