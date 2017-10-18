@@ -8,6 +8,7 @@ import (
 
 type Ret struct {
 	Label    string
+	Bytes    int
 	CountMap map[string]int
 	Error    error
 	Start    time.Time
@@ -16,6 +17,7 @@ type Ret struct {
 func NewRet(label string) Ret {
 	return Ret{
 		Label:    label,
+		Bytes:    0,
 		CountMap: make(map[string]int),
 		Error:    nil,
 		Start:    time.Now(),
@@ -33,6 +35,10 @@ func ParseType(type_ string) string {
 		t = "count"
 	}
 	return t
+}
+
+func (r *Ret) AddBytes(bytes int) {
+	r.Bytes = r.Bytes + bytes
 }
 
 func (r *Ret) Add(type_ string) {
@@ -76,34 +82,51 @@ func (r *Ret) Lt(type_ string, ct int) bool {
 	return r.Value(type_) < ct
 }
 
-// seconds by default
-func (r *Ret) Taken(type_ ...time.Duration) int {
-	t := time.Second
-	if len(type_) > 0 {
-		t = type_[0]
+func Label(dur time.Duration) string {
+	if dur == time.Minute {
+		return "mins"
+	} else if dur == time.Second {
+		return "sec"
+	} else if dur == time.Millisecond {
+		return "ms"
+	} else {
+		return "ns"
 	}
-	dur := time.Since(r.Start)
-	v := int(dur / t)
-	return v
 }
 
-func (r *Ret) Bytes() int {
-	bytes, ok := r.CountMap["bytes"]
-	if !ok {
-		return 0
+// This will determine the right value to use
+func (r *Ret) Taken(tDur ...time.Duration) (int, string) {
+	var t time.Duration
+	dur := time.Since(r.Start)
+	if len(tDur) > 0 {
+		t = tDur[0]
 	}
-	megs := bytes / (1000 * 1000)
+	if dur >= 1000*time.Second {
+		t = time.Minute
+	} else if dur >= 10000*time.Millisecond {
+		t = time.Second
+	} else if dur >= 10000*time.Nanosecond {
+		t = time.Millisecond
+	} else {
+		t = time.Nanosecond
+	}
+	taken := int(dur / t)
+	return taken, Label(t)
+}
+
+func (r *Ret) Megs() int {
+	megs := r.Bytes / (1000 * 1000)
 	return megs
 }
 
 func (r *Ret) Speed() string {
-	secs := r.Taken()
-	megs := r.Bytes()
+	secs, _ := r.Taken(time.Second)
+	megs := r.Megs()
 	if megs == 0 {
 		return ""
 	}
-	speed := (float64(megs) / float64(secs) * 8)
-	return fmt.Sprintf("%d megs (speed %f mbps)", megs, speed)
+	speed := (float64(megs*8) / float64(secs))
+	return fmt.Sprintf("%d megs (speed %.1f mbps)", megs, speed)
 }
 
 func (r *Ret) String() string {
@@ -115,11 +138,11 @@ func (r *Ret) String() string {
 		str = str + fmt.Sprintf(", %s %d", k, v)
 	}
 	str = str + "\n"
-	ms := r.Taken(time.Millisecond)
+	s, l := r.Taken()
 	speed := r.Speed()
 	if speed != "" {
 		speed = ", " + speed
 	}
-	str = str + fmt.Sprintf("took %d ms%s", ms, speed)
+	str = str + fmt.Sprintf("took %d %s%s", s, l, speed)
 	return str
 }
