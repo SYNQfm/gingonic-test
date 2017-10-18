@@ -11,6 +11,10 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+const (
+	DEFAULT_DB_URL = "postgres://circleci:circleci@localhost:5432/db_test?sslmode=disable"
+)
+
 func SetupDB(def_url ...string) *sqlx.DB {
 	db_url := os.Getenv("DATABASE_URL")
 	if db_url == "" && len(def_url) > 0 {
