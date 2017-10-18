@@ -8,6 +8,7 @@ import (
 
 type Ret struct {
 	Label    string
+	Bytes    int
 	CountMap map[string]int
 	Error    error
 	Start    time.Time
@@ -16,6 +17,7 @@ type Ret struct {
 func NewRet(label string) Ret {
 	return Ret{
 		Label:    label,
+		Bytes:    0,
 		CountMap: make(map[string]int),
 		Error:    nil,
 		Start:    time.Now(),
@@ -33,6 +35,10 @@ func ParseType(type_ string) string {
 		t = "count"
 	}
 	return t
+}
+
+func (r *Ret) AddBytes(bytes int) {
+	r.Bytes = r.Bytes + bytes
 }
 
 func (r *Ret) Add(type_ string) {
@@ -76,6 +82,53 @@ func (r *Ret) Lt(type_ string, ct int) bool {
 	return r.Value(type_) < ct
 }
 
+func Label(dur time.Duration) string {
+	if dur == time.Minute {
+		return "mins"
+	} else if dur == time.Second {
+		return "sec"
+	} else if dur == time.Millisecond {
+		return "ms"
+	} else {
+		return "ns"
+	}
+}
+
+// This will determine the right value to use
+func (r *Ret) Taken(tDur ...time.Duration) (int, string) {
+	var t time.Duration
+	dur := time.Since(r.Start)
+	if len(tDur) > 0 {
+		t = tDur[0]
+	}
+	if dur >= 1000*time.Second {
+		t = time.Minute
+	} else if dur >= 10000*time.Millisecond {
+		t = time.Second
+	} else if dur >= 10000*time.Nanosecond {
+		t = time.Millisecond
+	} else {
+		t = time.Nanosecond
+	}
+	taken := int(dur / t)
+	return taken, Label(t)
+}
+
+func (r *Ret) Megs() int {
+	megs := r.Bytes / (1000 * 1000)
+	return megs
+}
+
+func (r *Ret) Speed() string {
+	secs, _ := r.Taken(time.Second)
+	megs := r.Megs()
+	if megs == 0 {
+		return ""
+	}
+	speed := (float64(megs*8) / float64(secs))
+	return fmt.Sprintf("%d megs (speed %.1f mbps)", megs, speed)
+}
+
 func (r *Ret) String() string {
 	str := fmt.Sprintf("for %s, processed %d/%d", r.Label, r.Value("ct"), r.Value("total"))
 	for k, v := range r.CountMap {
@@ -85,8 +138,11 @@ func (r *Ret) String() string {
 		str = str + fmt.Sprintf(", %s %d", k, v)
 	}
 	str = str + "\n"
-	dur := time.Since(r.Start)
-	ms := int(dur / time.Millisecond)
-	str = str + fmt.Sprintf("took %d ms", ms)
+	s, l := r.Taken()
+	speed := r.Speed()
+	if speed != "" {
+		speed = ", " + speed
+	}
+	str = str + fmt.Sprintf("took %d %s%s", s, l, speed)
 	return str
 }
