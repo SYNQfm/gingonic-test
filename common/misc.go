@@ -50,6 +50,11 @@ func (c *Cli) Parse() {
 			120,
 			"timeout to use for API call, in seconds, defaults to 120",
 		)
+		l = flag.Int(
+			"limit",
+			10,
+			"number of actions to run",
+		)
 	)
 	flag.Parse()
 	c.Command = *cmd
