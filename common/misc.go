@@ -19,6 +19,7 @@ type Cli struct {
 	Command  string
 	Timeout  int
 	Simulate bool
+	Limit    int
 	CmdMsg   string
 	CmdDef   string
 }
@@ -60,6 +61,7 @@ func (c *Cli) Parse() {
 	c.Command = *cmd
 	c.Timeout = *t
 	c.Simulate = *s != "false"
+	c.Limit = *l
 }
 
 func ParseType(type_ string) string {
