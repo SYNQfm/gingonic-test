@@ -1,7 +1,6 @@
 package common
 
 import (
-	"flag"
 	"fmt"
 	"strings"
 	"time"
@@ -15,16 +14,6 @@ type Ret struct {
 	Start    time.Time
 }
 
-type Cli struct {
-	Command  string
-	Timeout  int
-	Simulate bool
-	Limit    int
-	CacheDir string
-	CmdMsg   string
-	CmdDef   string
-}
-
 func NewRet(label string) Ret {
 	return Ret{
 		Label:    label,
@@ -33,42 +22,6 @@ func NewRet(label string) Ret {
 		Error:    nil,
 		Start:    time.Now(),
 	}
-}
-
-func (c *Cli) Parse() {
-	var (
-		cmd = flag.String(
-			"command",
-			c.CmdDef,
-			c.CmdMsg,
-		)
-		s = flag.String(
-			"simulate",
-			"true",
-			"simulate the transaction",
-		)
-		t = flag.Int(
-			"timeout",
-			120,
-			"timeout to use for API call, in seconds, defaults to 120",
-		)
-		l = flag.Int(
-			"limit",
-			10,
-			"number of actions to run",
-		)
-		cd = flag.String(
-			"cache_dir",
-			"",
-			"cache dir to use for saved values",
-		)
-	)
-	flag.Parse()
-	c.Command = *cmd
-	c.Timeout = *t
-	c.Simulate = *s != "false"
-	c.Limit = *l
-	c.CacheDir = *cd
 }
 
 func ParseType(type_ string) string {
