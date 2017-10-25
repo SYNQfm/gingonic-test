@@ -69,8 +69,8 @@ func (c *Cli) LoadVideos(sApi synq.Api) (videos []synq.Video, err error) {
 		}
 	}
 	if len(videos) == 0 {
-		log.Println("querying %s", c.Filter)
-		videos, err := sApi.Query(c.Filter)
+		log.Printf("querying '%s'\n", c.Filter)
+		videos, err = sApi.Query(c.Filter)
 		if err != nil {
 			return videos, err
 
