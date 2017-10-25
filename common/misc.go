@@ -68,6 +68,7 @@ func (c *Cli) Parse() {
 	c.Timeout = *t
 	c.Simulate = *s != "false"
 	c.Limit = *l
+	c.CacheDir = *cd
 }
 
 func ParseType(type_ string) string {
