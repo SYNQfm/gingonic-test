@@ -58,7 +58,7 @@ func (c *Cli) Parse() {
 	c.CacheDir = *cd
 }
 
-func (c *Cli) LoadVideos() (videos []synq.Video) {
+func (c *Cli) LoadVideos(sApi synq.Api) (videos []synq.Video, err error) {
 	cache_file := ""
 	if c.CacheDir != "" {
 		cache_file = c.CacheDir + "/" + c.FilterType + ".json"
@@ -72,8 +72,8 @@ func (c *Cli) LoadVideos() (videos []synq.Video) {
 		log.Println("querying %s", c.Filter)
 		videos, err := sApi.Query(c.Filter)
 		if err != nil {
-			log.Println("error with query ", err.Error())
-			os.Exit(1)
+			return videos, err
+
 		}
 		if cache_file != "" {
 			data, _ := json.Marshal(&videos)
@@ -81,5 +81,5 @@ func (c *Cli) LoadVideos() (videos []synq.Video) {
 			ioutil.WriteFile(cache_file, data, 0755)
 		}
 	}
-	return videos
+	return videos, nil
 }
