@@ -20,6 +20,7 @@ type Cli struct {
 	Timeout  int
 	Simulate bool
 	Limit    int
+	CacheDir string
 	CmdMsg   string
 	CmdDef   string
 }
@@ -55,6 +56,11 @@ func (c *Cli) Parse() {
 			"limit",
 			10,
 			"number of actions to run",
+		)
+		cd = flag.String(
+			"cache_dir",
+			"",
+			"cache dir to use for saved values",
 		)
 	)
 	flag.Parse()
