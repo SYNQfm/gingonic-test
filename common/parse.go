@@ -6,21 +6,19 @@ import (
 	"net/url"
 	"os"
 	"strings"
-
-	"github.com/jmoiron/sqlx"
 )
 
 const (
 	DEFAULT_DB_URL = "postgres://circleci:circleci@localhost:5432/db_test?sslmode=disable"
 )
 
-func SetupDB(def_url ...string) *sqlx.DB {
+func GetDB(def_url ...string) string {
 	db_url := os.Getenv("DATABASE_URL")
 	if db_url == "" && len(def_url) > 0 {
 		db_url = def_url[0]
 	}
 	dbaddr := ParseDatabaseUrl(db_url)
-	return sqlx.MustConnect("postgres", dbaddr)
+	return dbaddr
 }
 
 // this parses the database url and returns it in the format sqlx.DB expects
