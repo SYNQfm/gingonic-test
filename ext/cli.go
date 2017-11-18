@@ -1,4 +1,4 @@
-package synq
+package ext
 
 import (
 	"encoding/json"
