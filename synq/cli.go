@@ -1,4 +1,4 @@
-package common
+package synq
 
 import (
 	"encoding/json"
