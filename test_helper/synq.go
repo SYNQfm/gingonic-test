@@ -156,7 +156,7 @@ func handleV1(w http.ResponseWriter, r *http.Request) {
 				"/v1/video/query":
 				paths := strings.Split(r.RequestURI, "/")
 				action := paths[len(paths)-1]
-				resp = LoadSample(action + ".json")
+				resp = LoadSample(action)
 			default:
 				w.WriteHeader(http.StatusBadRequest)
 				resp = []byte(HTTP_NOT_FOUND)
