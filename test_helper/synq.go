@@ -33,6 +33,11 @@ const (
 	ASSET_ID          = "01823629-bcf2-4c34-b714-ae21e1a4647f"
 )
 
+func SetSampleDir(sampleDir string) {
+	log.Printf("Setting sample dir to %s\n", sampleDir)
+	defaultSampleDir = sampleDir
+}
+
 func LoadSample(name string, sampleDir ...string) (data []byte) {
 	sDir := defaultSampleDir
 	if len(sampleDir) > 0 {
