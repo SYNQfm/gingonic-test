@@ -20,12 +20,12 @@ func SetupSynq() synq.Api {
 	return api.(synq.Api)
 }
 
-func SetupSynqV2() synq.Api {
+func SetupSynqV2() synq.ApiV2 {
 	api := SetupSynqApi()
 	return api.(synq.ApiV2)
 }
 
-func SetupSynqApi() (api synq.api) {
+func SetupSynqApi() (api synq.ApiF) {
 	key := os.Getenv("SYNQ_API_KEY")
 	if key == "" {
 		log.Println("WARNING : no Synq API key specified")

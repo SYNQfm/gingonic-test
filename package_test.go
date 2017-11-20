@@ -3,7 +3,7 @@ package helpers
 import (
 	"testing"
 
-	"github.com/SYNQfm/helpers/test_helper"
+	"github.com/SYNQfm/test_helper"
 	"github.com/stretchr/testify/assert"
 )
 
