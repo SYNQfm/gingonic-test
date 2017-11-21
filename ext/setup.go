@@ -16,21 +16,25 @@ func SetupDB(def_url ...string) *sqlx.DB {
 }
 
 func SetupSynq() synq.Api {
-	api := SetupSynqApi()
+	api := SetupSynqApi("v1")
 	return api.(synq.Api)
 }
 
-func SetupSynqV2() synq.Api {
-	api := SetupSynqApi()
+func SetupSynqV2() synq.ApiV2 {
+	api := SetupSynqApi("v2")
 	return api.(synq.ApiV2)
 }
 
-func SetupSynqApi() (api synq.api) {
+func SetupSynqApi(version ...string) (api synq.ApiF) {
 	key := os.Getenv("SYNQ_API_KEY")
 	if key == "" {
 		log.Println("WARNING : no Synq API key specified")
 	}
-	if strings.Contains(key, ".") {
+	ver := os.Getenv("SYNQ_API_VERSION")
+	if len(version) > 0 {
+		ver = version[0]
+	}
+	if strings.Contains(key, ".") || ver == "v2" {
 		api = synq.NewV2(key)
 	} else {
 		api = synq.NewV1(key)
