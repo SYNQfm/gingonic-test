@@ -27,10 +27,11 @@ func SetupSynqV2() synq.ApiV2 {
 
 func SetupSynqApi() (api synq.ApiF) {
 	key := os.Getenv("SYNQ_API_KEY")
+	version := os.Getenv("SYNQ_API_VERSION")
 	if key == "" {
 		log.Println("WARNING : no Synq API key specified")
 	}
-	if strings.Contains(key, ".") {
+	if strings.Contains(key, ".") || version == "v2" {
 		api = synq.NewV2(key)
 	} else {
 		api = synq.NewV1(key)
