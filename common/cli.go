@@ -62,7 +62,7 @@ func (c *Cli) Parse(args ...[]string) {
 	} else {
 		i := 0
 		for idx, val := range os.Args {
-			if idx == 0 || strings.Contains(val, "-test.run") {
+			if idx == 0 || strings.Contains(val, "-test.") {
 				i = i + 1
 				continue
 			} else {
