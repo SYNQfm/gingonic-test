@@ -3,6 +3,7 @@ package common
 import (
 	"flag"
 	"os"
+	"strings"
 )
 
 type Cli struct {
@@ -59,7 +60,16 @@ func (c *Cli) Parse(args ...[]string) {
 	if len(args) > 0 {
 		a = args[0]
 	} else {
-		a = os.Args[1:]
+		i := 0
+		for idx, val := range os.Args {
+			if idx == 0 || strings.Contains(val, "-test.run") {
+				i = i + 1
+				continue
+			} else {
+				break
+			}
+		}
+		a = os.Args[i:]
 	}
 	c.Flag.Parse(a)
 	c.Command = c.GetString("command")
