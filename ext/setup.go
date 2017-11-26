@@ -53,10 +53,10 @@ func SetupSynqApi(setup ...ApiSetup) (api synq.ApiF) {
 	if config.Key == "" {
 		log.Println("WARNING : no Synq API key specified")
 	}
-	if strings.Contains(key, ".") || config.Version == "v2" {
-		api = synq.NewV2(key)
+	if strings.Contains(config.Key, ".") || config.Version == "v2" {
+		api = synq.NewV2(config.Key)
 	} else {
-		api = synq.NewV1(key)
+		api = synq.NewV1(config.Key)
 	}
 	if config.Url != "" {
 		api.SetUrl(config.Url)
