@@ -73,11 +73,6 @@ func (c *Cli) GetSeconds(name string) time.Duration {
 	return time.Duration(val) * time.Second
 }
 
-func (c *Cli) GetSimulate() bool {
-	val := c.GetString("simulate")
-	return val != "false"
-}
-
 func (c *Cli) Parse(args ...[]string) {
 	var a []string
 	if len(args) > 0 {
