@@ -13,7 +13,7 @@ type Cacheable interface {
 
 type Cli struct {
 	Command  string
-	Timeout  int
+	Timeout  time.Duration
 	Simulate bool
 	Limit    int
 	CacheDir string
@@ -91,7 +91,7 @@ func (c *Cli) Parse(args ...[]string) {
 	}
 	c.Flag.Parse(a)
 	c.Command = c.GetString("command")
-	c.Timeout = c.GetInt("timeout")
+	c.Timeout = c.GetSeconds("timeout")
 	c.Simulate = c.GetString("simulate") != "false"
 	c.Limit = c.GetInt("limit")
 	c.CacheDir = c.GetString("cache_dir")
