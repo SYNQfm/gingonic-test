@@ -10,36 +10,35 @@ import (
 	"github.com/SYNQfm/helpers/common"
 )
 
-func LoadVideos(c common.Cli, api synq.Api) (videos []synq.Video, err error) {
-	cache_file := ""
-	if c.CacheDir != "" {
-		cache_file = c.CacheDir + "/" + c.FilterType + ".json"
-		if _, e := os.Stat(cache_file); e == nil {
-			log.Printf("loading from cached file %s\n", cache_file)
-			bytes, _ := ioutil.ReadFile(cache_file)
+func LoadVideosByQuery(query, name string, c common.Cacheable, api synq.Api) (videos []synq.Video, err error) {
+	cacheFile := c.GetCacheFile(name)
+	if cacheFile != "" {
+		if _, e := os.Stat(cacheFile); e == nil {
+			log.Printf("loading from cached file %s\n", cacheFile)
+			bytes, _ := ioutil.ReadFile(cacheFile)
 			json.Unmarshal(bytes, &videos)
 		}
 	}
 	if len(videos) == 0 {
-		log.Printf("querying '%s'\n", c.Filter)
-		videos, err = api.Query(c.Filter)
+		log.Printf("querying '%s'\n", query)
+		videos, err = api.Query(query)
 		if err != nil {
 			return videos, err
 
 		}
-		if cache_file != "" {
+		if cacheFile != "" {
 			data, _ := json.Marshal(&videos)
-			log.Printf("saving %d videos to %s\n", len(videos), cache_file)
-			ioutil.WriteFile(cache_file, data, 0755)
+			log.Printf("saving %d videos to %s\n", len(videos), cacheFile)
+			ioutil.WriteFile(cacheFile, data, 0755)
 		}
 	}
 	return videos, nil
 }
 
-func LoadVideo(id string, c common.Cli, api synq.Api) (video synq.Video, err error) {
-	name := c.CacheDir + "/" + id + ".json"
-	if _, err := os.Stat(name); err == nil {
-		bytes, _ := ioutil.ReadFile(name)
+func LoadVideo(id string, c common.Cacheable, api synq.Api) (video synq.Video, err error) {
+	cacheFile := c.GetCacheFile(id)
+	if _, err := os.Stat(cacheFile); err == nil {
+		bytes, _ := ioutil.ReadFile(cacheFile)
 		json.Unmarshal(bytes, &video)
 	} else {
 		// need to use the v1 api to get the raw video data
@@ -48,8 +47,10 @@ func LoadVideo(id string, c common.Cli, api synq.Api) (video synq.Video, err err
 		if e != nil {
 			return video, e
 		}
-		bytes, _ := json.Marshal(video)
-		ioutil.WriteFile(name, bytes, 0755)
+		if cacheFile != "" {
+			bytes, _ := json.Marshal(video)
+			ioutil.WriteFile(cacheFile, bytes, 0755)
+		}
 	}
 	return video, err
 }

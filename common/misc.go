@@ -151,6 +151,9 @@ func (r *Ret) String() string {
 // return 32 bytes into 36 bytes
 // xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 func ConvertToUUIDFormat(uuid string) string {
+	if len(uuid) == 36 && strings.Count(uuid, "-") == 4 {
+		return uuid
+	}
 	if len(uuid) != 32 {
 		log.Printf("invalid uuid %s\n", uuid)
 		return uuid

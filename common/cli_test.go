@@ -2,6 +2,7 @@ package common
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -21,5 +22,7 @@ func TestDefaultCli(t *testing.T) {
 	cli.Parse([]string{})
 	assert.Equal("test", cli.GetString("command"))
 	assert.Equal(120, cli.GetInt("timeout"))
+	assert.True(cli.Simulate)
+	assert.Equal(time.Duration(120)*time.Second, cli.Timeout)
 	assert.Equal(10, cli.GetInt("limit"))
 }
