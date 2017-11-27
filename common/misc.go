@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 )
@@ -145,4 +146,14 @@ func (r *Ret) String() string {
 	}
 	str = str + fmt.Sprintf("took %d %s%s", s, l, speed)
 	return str
+}
+
+// return 32 bytes into 36 bytes
+// xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+func ConvertToUUIDFormat(uuid string) string {
+	if len(uuid) != 32 {
+		log.Printf("invalid uuid %s\n", uuid)
+		return uuid
+	}
+	return fmt.Sprintf("%s-%s-%s-%s-%s", uuid[0:8], uuid[8:12], uuid[12:16], uuid[16:20], uuid[20:])
 }

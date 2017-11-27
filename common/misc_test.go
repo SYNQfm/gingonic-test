@@ -49,3 +49,10 @@ func TestString(t *testing.T) {
 	assert.Contains(str, "1 megs (speed 0.1 mbps)")
 	assert.Contains(str, "took 60 sec")
 }
+
+func TestConvert(t *testing.T) {
+	assert := assert.New(t)
+	uuid := "45d4062f99454c9fb21e5186a09c2119"
+	vid := ConvertToUUIDFormat(uuid)
+	assert.Equal("45d4062f-9945-4c9f-b21e-5186a09c2119", vid)
+}
