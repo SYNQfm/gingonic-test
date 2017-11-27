@@ -35,3 +35,21 @@ func LoadVideos(c common.Cli, api synq.Api) (videos []synq.Video, err error) {
 	}
 	return videos, nil
 }
+
+func LoadVideo(id string, c common.Cli, api synq.Api) (video synq.Video, err error) {
+	name := c.CacheDir + "/" + id + ".json"
+	if _, err := os.Stat(name); err == nil {
+		bytes, _ := ioutil.ReadFile(name)
+		json.Unmarshal(bytes, &video)
+	} else {
+		// need to use the v1 api to get the raw video data
+		log.Printf("Getting video %s", id)
+		video, e := api.GetVideo(id)
+		if e != nil {
+			return video, e
+		}
+		bytes, _ := json.Marshal(video)
+		ioutil.WriteFile(name, bytes, 0755)
+	}
+	return video, err
+}
