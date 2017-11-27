@@ -4,18 +4,21 @@ import (
 	"flag"
 	"os"
 	"strings"
+	"time"
 )
 
+type Cacheable interface {
+	GetCacheFile(string) string
+}
+
 type Cli struct {
-	Command    string
-	Timeout    int
-	Simulate   bool
-	Limit      int
-	Filter     string
-	FilterType string
-	CacheDir   string
-	Flag       *flag.FlagSet
-	Args       map[string]interface{}
+	Command  string
+	Timeout  int
+	Simulate bool
+	Limit    int
+	CacheDir string
+	Flag     *flag.FlagSet
+	Args     map[string]interface{}
 }
 
 func NewCli() Cli {
@@ -32,6 +35,13 @@ func (c *Cli) DefaultSetup(msg, def string) {
 	c.Int("timeout", 120, "timeout to use for API call, in seconds, defaults to 120")
 	c.Int("limit", 10, "number of actions to run")
 	c.String("cache_dir", "", "cache dir to use for saved values")
+}
+
+func (c Cli) GetCacheFile(name string) string {
+	if c.CacheDir == "" {
+		return ""
+	}
+	return c.CacheDir + "/" + name + ".json"
 }
 
 func (c *Cli) String(name, def, desc string) {
@@ -53,6 +63,19 @@ func (c *Cli) GetInt(name string) int {
 		return -1
 	}
 	return *c.Args[name].(*int)
+}
+
+func (c *Cli) GetSeconds(name string) time.Duration {
+	val := c.GetInt(name)
+	if val == -1 {
+		return -1
+	}
+	return time.Duration(val) * time.Second
+}
+
+func (c *Cli) GetSimulate() bool {
+	val := c.GetString("simulate")
+	return val != "false"
 }
 
 func (c *Cli) Parse(args ...[]string) {
