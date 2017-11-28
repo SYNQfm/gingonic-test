@@ -2,6 +2,7 @@ package common
 
 import (
 	"flag"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -35,6 +36,17 @@ func (c *Cli) DefaultSetup(msg, def string) {
 	c.Int("timeout", 120, "timeout to use for API call, in seconds, defaults to 120")
 	c.Int("limit", 10, "number of actions to run")
 	c.String("cache_dir", "", "cache dir to use for saved values")
+}
+
+func (c Cli) Println(msg string) {
+	c.Printf(msg + "\n")
+}
+
+func (c Cli) Printf(msg string, args ...interface{}) {
+	if c.Simulate {
+		msg = "(simulate) " + msg
+	}
+	log.Printf(msg, args...)
 }
 
 func (c Cli) GetCacheFile(name string) string {
