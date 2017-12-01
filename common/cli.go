@@ -8,6 +8,12 @@ import (
 	"time"
 )
 
+const (
+	UPLOADED_STATE = `video.state == "uploaded" && video.userdata.hydra && video.userdata.hydra.job_state == "completed"`
+	HAS_DASH       = `video.userdata.hydra.outputs.dash && video.userdata.hydra.outputs.dash.metadata`
+	HAS_HLS        = `video.userdata.hydra.outputs.hls`
+)
+
 type Cacheable interface {
 	GetCacheFile(string) string
 }
@@ -107,4 +113,65 @@ func (c *Cli) Parse(args ...[]string) {
 	c.Simulate = c.GetString("simulate") != "false"
 	c.Limit = c.GetInt("limit")
 	c.CacheDir = c.GetString("cache_dir")
+}
+
+func (c *Cli) GetFilter(fta ...string) (filter string, filterType string) {
+	var ft string
+	if len(fta) >= 0 {
+		ft = fta[0]
+	} else {
+		ft = c.GetString("filter_type")
+	}
+	checks := []string{"video.userdata.importer"}
+	projectId := c.GetString("project")
+	hasProject := `video.userdata["` + projectId + `"] != null`
+	switch ft {
+	case "metadata_only",
+		"mo":
+		checks = append(checks, `video.state == "created"`)
+		filterType = "mo"
+	case "all_with_metadata",
+		"awm":
+		checks = append(checks, hasProject)
+		filterType = "awm"
+	case "no_metadata",
+		"nm":
+		checks = append(checks, "video.userdata.juneMeta == null")
+		filterType = "nm"
+	case "dash_only",
+		"do":
+		checks = append(checks, UPLOADED_STATE)
+		checks = append(checks, HAS_DASH)
+		checks = append(checks, `video.userdata.hydra.outputs.hls == null`)
+		filterType = "do"
+	case "hls_dash",
+		"hlda":
+		checks = append(checks, UPLOADED_STATE)
+		checks = append(checks, HAS_DASH)
+		checks = append(checks, HAS_HLS)
+		filterType = "hlda"
+	case "transcoded",
+		"t":
+		checks = append(checks, UPLOADED_STATE)
+		filterType = "t"
+	case "series_dash",
+		"sd":
+		checks = append(checks, UPLOADED_STATE)
+		checks = append(checks, HAS_DASH)
+		checks = append(checks, hasProject)
+		checks = append(checks, `video.userdata["`+projectId+`"]["seriesInfo"] != null`)
+		checks = append(checks, `video.userdata["`+projectId+`"]["seriesInfo"]["seriesId"] == "`+c.GetString("series_id")+`"`)
+		filterType = "sd"
+	case "all_duration",
+		"ad":
+		checks = append(checks, UPLOADED_STATE)
+		checks = append(checks, HAS_DASH)
+		filterType = "ad"
+	default:
+		log.Printf("unknown type '%s'\n", ft)
+		os.Exit(1)
+	}
+	toFilter := strings.Join(checks, " && ")
+	filter = `if (` + toFilter + `) { return video }`
+	return filter, filterType
 }
