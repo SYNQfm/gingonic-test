@@ -21,6 +21,7 @@ type Cacheable interface {
 type Cli struct {
 	Command  string
 	Timeout  time.Duration
+	Sleep    time.Duration
 	Simulate bool
 	Limit    int
 	CacheDir string
@@ -91,6 +92,13 @@ func (c *Cli) GetSeconds(name string) time.Duration {
 	return time.Duration(val) * time.Second
 }
 
+func (c *Cli) GetSleep() time.Duration {
+	if c.Sleep != time.Duration(0) {
+		return c.Sleep
+	}
+	return c.GetSeconds("sleep")
+}
+
 func (c *Cli) Parse(args ...[]string) {
 	var a []string
 	if len(args) > 0 {
@@ -113,6 +121,7 @@ func (c *Cli) Parse(args ...[]string) {
 	c.Simulate = c.GetString("simulate") != "false"
 	c.Limit = c.GetInt("limit")
 	c.CacheDir = c.GetString("cache_dir")
+	c.Sleep = c.GetSeconds("sleep")
 }
 
 func (c *Cli) GetFilter(fta ...string) (filter string, filterType string) {
