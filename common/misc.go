@@ -166,8 +166,12 @@ func ConvertToUUIDFormat(uuid string) string {
 	return fmt.Sprintf("%s-%s-%s-%s-%s", uuid[0:8], uuid[8:12], uuid[12:16], uuid[16:20], uuid[20:])
 }
 
+func ConverFromUUIDFormat(uuid string) string {
+	return strings.Replace(uuid, "-", "", -1)
+}
+
 // Get environment variable
-func getOsEnv(env string, mandatory bool, defaultValue ...string) (value string) {
+func GetOsEnv(env string, mandatory bool, defaultValue ...string) (value string) {
 	value = os.Getenv(env)
 	if value == "" {
 		if mandatory {
@@ -179,22 +183,22 @@ func getOsEnv(env string, mandatory bool, defaultValue ...string) (value string)
 	return
 }
 
-func getAwsSignature(message, secret string) string {
+func GetAwsSignature(message, secret string) string {
 	mac := hmac.New(sha1.New, []byte(secret))
 	mac.Write([]byte(message))
 	return base64.StdEncoding.EncodeToString(mac.Sum(nil))
 }
 
 // Multipart Upload
-func getMultipartSignature(headers, awsSecret string) []byte {
+func GetMultipartSignature(headers, awsSecret string) []byte {
 	infoMap := map[string]string{
-		"signature": getAwsSignature(headers, awsSecret),
+		"signature": GetAwsSignature(headers, awsSecret),
 	}
 
 	signature, _ := json.Marshal(infoMap)
 	return signature
 }
 
-func getFileExtension(filetype string) string {
+func GetFileExtension(filetype string) string {
 	return strings.Split(strings.Split(filetype, "/")[1], "+")[0]
 }
