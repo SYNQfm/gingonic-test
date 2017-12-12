@@ -1,8 +1,13 @@
 package common
 
 import (
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 )
@@ -159,4 +164,33 @@ func ConvertToUUIDFormat(uuid string) string {
 		return uuid
 	}
 	return fmt.Sprintf("%s-%s-%s-%s-%s", uuid[0:8], uuid[8:12], uuid[12:16], uuid[16:20], uuid[20:])
+}
+
+// Get environment variable
+func getOsEnv(env string, mandatory bool, defaultValue ...string) (value string) {
+	value = os.Getenv(env)
+	if value == "" {
+		if mandatory {
+			log.Panicf(`Can't run without environment variable ${%s} set.`, env)
+		} else if len(defaultValue) > 0 {
+			value = defaultValue[0]
+		}
+	}
+	return
+}
+
+func getAwsSignature(message, secret string) string {
+	mac := hmac.New(sha1.New, []byte(secret))
+	mac.Write([]byte(message))
+	return base64.StdEncoding.EncodeToString(mac.Sum(nil))
+}
+
+// Multipart Upload
+func getMultipartSignature(headers, awsSecret string) []byte {
+	infoMap := map[string]string{
+		"signature": getAwsSignature(headers, awsSecret),
+	}
+
+	signature, _ := json.Marshal(infoMap)
+	return signature
 }
