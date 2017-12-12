@@ -50,22 +50,22 @@ func ParseDatabaseUrl(dbUrl string) string {
 	return str
 }
 
-func isSSL(r *http.Request) bool {
+func IsSSL(r *http.Request) bool {
 	return r.Header.Get("X-Forwarded-Proto") == "https"
 }
 
 //checks if a string is a valid html color(but without the '#')
-func isColor(str string) bool {
+func IsColor(str string) bool {
 	result, _ := regexp.MatchString("(^[0-9A-Fa-f]{3}([0-9A-Fa-f]{3})?$)", str)
 	return result
 }
 
-func isNumber(str string) bool {
+func IsNumber(str string) bool {
 	result, _ := regexp.MatchString("(^[0-9]+$)", str)
 	return result
 }
 
-func parseBool(key string, urlMap url.Values, defaultValue ...bool) bool {
+func ParseBool(key string, urlMap url.Values, defaultValue ...bool) bool {
 	if urlMap[key] != nil {
 		if urlMap[key][0] == "true" {
 			return true
@@ -79,9 +79,9 @@ func parseBool(key string, urlMap url.Values, defaultValue ...bool) bool {
 	return false
 }
 
-func parseColor(key string, urlMap url.Values, defaultValue ...string) string {
+func ParseColor(key string, urlMap url.Values, defaultValue ...string) string {
 	if urlMap[key] != nil {
-		if isColor(urlMap[key][0]) {
+		if IsColor(urlMap[key][0]) {
 			return "#" + urlMap[key][0]
 		}
 	}
@@ -91,9 +91,9 @@ func parseColor(key string, urlMap url.Values, defaultValue ...string) string {
 	return ""
 }
 
-func parseInt(key string, urlMap url.Values, defaultValue ...int) int {
+func ParseInt(key string, urlMap url.Values, defaultValue ...int) int {
 	if urlMap[key] != nil {
-		if isNumber(urlMap[key][0]) {
+		if IsNumber(urlMap[key][0]) {
 			seek, _ := strconv.Atoi(urlMap[key][0])
 			return seek
 		}
@@ -104,7 +104,7 @@ func parseInt(key string, urlMap url.Values, defaultValue ...int) int {
 	return 0
 }
 
-func parseString(key string, urlMap url.Values, defaultValue ...string) string {
+func ParseString(key string, urlMap url.Values, defaultValue ...string) string {
 	if urlMap[key] != nil {
 		return urlMap[key][0]
 	}
