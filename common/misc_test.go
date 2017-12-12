@@ -1,6 +1,7 @@
 package common
 
 import (
+	"encoding/json"
 	"log"
 	"testing"
 	"time"
@@ -57,4 +58,33 @@ func TestConvert(t *testing.T) {
 	assert.Equal("45d4062f-9945-4c9f-b21e-5186a09c2119", vid)
 	vid2 := ConvertToUUIDFormat(vid)
 	assert.Equal("45d4062f-9945-4c9f-b21e-5186a09c2119", vid2)
+}
+
+func TestGetFileExtension(t *testing.T) {
+	log.Println("Testing GetFileExtension")
+	assert := assert.New(t)
+	ext := GetFileExtension("video/mp4")
+	assert.Equal("mp4", ext)
+}
+
+func TestGetAwsSignature(t *testing.T) {
+	log.Println("Testing getAwsSignature")
+	assert := assert.New(t)
+	assert.NotNil(GetAwsSignature("message", "secret"))
+}
+
+func TestGetMultipartSignature(t *testing.T) {
+	log.Println("Testing getMultipartSignature")
+	assert := assert.New(t)
+	videoKey := "/path/to/file"
+	headers := "POST\n\nvideo/mp4\n\nx-amz-acl:public-read\nx-amz-date:Mon, 23 Oct 2017 18:50:29 GMT\n" + videoKey + "?uploads"
+	signature := GetMultipartSignature(headers, "abcd")
+	assert.NotEmpty(signature)
+
+	mpsignature := struct {
+		Signature string `json:"signature"`
+	}{}
+	err := json.Unmarshal(signature, &mpsignature)
+	assert.Nil(err)
+	assert.Equal("TXUvxqMH7sUU/yLcOLrlh7C5su0=", mpsignature.Signature)
 }
