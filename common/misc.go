@@ -194,3 +194,11 @@ func getMultipartSignature(headers, awsSecret string) []byte {
 	signature, _ := json.Marshal(infoMap)
 	return signature
 }
+
+func getFileExtension(filetype string) string {
+	return strings.Split(strings.Split(filetype, "/")[1], "+")[0]
+}
+
+func getExpiration() string {
+	return time.Now().Add(time.Hour * time.Duration(24)).Format(TimeFormat)
+}
