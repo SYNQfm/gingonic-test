@@ -3,8 +3,11 @@ package common
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -45,4 +48,68 @@ func ParseDatabaseUrl(dbUrl string) string {
 		str = str + " sslmode=" + ssl
 	}
 	return str
+}
+
+func isSSL(r *http.Request) bool {
+	return r.Header.Get("X-Forwarded-Proto") == "https"
+}
+
+//checks if a string is a valid html color(but without the '#')
+func isColor(str string) bool {
+	result, _ := regexp.MatchString("(^[0-9A-Fa-f]{3}([0-9A-Fa-f]{3})?$)", str)
+	return result
+}
+
+func isNumber(str string) bool {
+	result, _ := regexp.MatchString("(^[0-9]+$)", str)
+	return result
+}
+
+func parseBool(key string, urlMap url.Values, defaultValue ...bool) bool {
+	if urlMap[key] != nil {
+		if urlMap[key][0] == "true" {
+			return true
+		} else if urlMap[key][0] == "false" {
+			return false
+		}
+	}
+	if len(defaultValue) > 0 {
+		return defaultValue[0]
+	}
+	return false
+}
+
+func parseColor(key string, urlMap url.Values, defaultValue ...string) string {
+	if urlMap[key] != nil {
+		if isColor(urlMap[key][0]) {
+			return "#" + urlMap[key][0]
+		}
+	}
+	if len(defaultValue) > 0 {
+		return "#" + defaultValue[0]
+	}
+	return ""
+}
+
+func parseInt(key string, urlMap url.Values, defaultValue ...int) int {
+	if urlMap[key] != nil {
+		if isNumber(urlMap[key][0]) {
+			seek, _ := strconv.Atoi(urlMap[key][0])
+			return seek
+		}
+	}
+	if len(defaultValue) > 0 {
+		return defaultValue[0]
+	}
+	return 0
+}
+
+func parseString(key string, urlMap url.Values, defaultValue ...string) string {
+	if urlMap[key] != nil {
+		return urlMap[key][0]
+	}
+	if len(defaultValue) > 0 {
+		return defaultValue[0]
+	}
+	return ""
 }
