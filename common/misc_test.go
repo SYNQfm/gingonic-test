@@ -61,23 +61,24 @@ func TestConvert(t *testing.T) {
 }
 
 func TestGetFileExtension(t *testing.T) {
-	log.Println("Testing getFileExtension")
+	log.Println("Testing GetFileExtension")
 	assert := assert.New(t)
 	ext := GetFileExtension("video/mp4")
-	assert.Equal(extension, ext)
+	assert.Equal("mp4", ext)
 }
 
 func TestGetAwsSignature(t *testing.T) {
 	log.Println("Testing getAwsSignature")
 	assert := assert.New(t)
-	assert.NotNil(getAwsSignature("message", "secret"))
+	assert.NotNil(GetAwsSignature("message", "secret"))
 }
 
 func TestGetMultipartSignature(t *testing.T) {
 	log.Println("Testing getMultipartSignature")
 	assert := assert.New(t)
+	videoKey := "/path/to/file"
 	headers := "POST\n\nvideo/mp4\n\nx-amz-acl:public-read\nx-amz-date:Mon, 23 Oct 2017 18:50:29 GMT\n" + videoKey + "?uploads"
-	signature := getMultipartSignature(headers, DefaultAWS.SecretKey)
+	signature := GetMultipartSignature(headers, "abcd")
 	assert.NotEmpty(signature)
 
 	mpsignature := struct {
@@ -85,5 +86,5 @@ func TestGetMultipartSignature(t *testing.T) {
 	}{}
 	err := json.Unmarshal(signature, &mpsignature)
 	assert.Nil(err)
-	assert.Equal("f+w3SFD1Pk5Cur06MAZRJ250zHg=", mpsignature.Signature)
+	assert.Equal("TXUvxqMH7sUU/yLcOLrlh7C5su0=", mpsignature.Signature)
 }
