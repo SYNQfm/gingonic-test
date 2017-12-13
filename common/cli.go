@@ -14,10 +14,6 @@ const (
 	HAS_HLS        = `video.userdata.hydra.outputs.hls`
 )
 
-type Cacheable interface {
-	GetCacheFile(string) string
-}
-
 type Cli struct {
 	Command  string
 	Timeout  time.Duration
