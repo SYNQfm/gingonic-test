@@ -55,6 +55,11 @@ func (r *Ret) Add(type_ string) {
 	r.CountMap[t] = r.CountMap[t] + 1
 }
 
+func (r *Ret) AddError(err error) {
+	r.Error = err
+	r.Add("errored")
+}
+
 func (r *Ret) IsErrored() bool {
 	return r.Value("total") == r.Value("errored")
 }
@@ -168,6 +173,26 @@ func ConvertToUUIDFormat(uuid string) string {
 
 func ConverFromUUIDFormat(uuid string) string {
 	return strings.Replace(uuid, "-", "", -1)
+}
+
+func ValidUUID(uuid string) bool {
+	if uuid == "" {
+		return false
+	}
+	if len(uuid) == 36 {
+		sec := strings.Split(uuid, "-")
+		if len(sec) != 5 {
+			return false
+		}
+		return len(sec[0]) == 8 && len(sec[1]) == 4 && len(sec[2]) == 4 && len(sec[3]) == 4 && len(sec[4]) == 12
+	} else if len(uuid) == 32 {
+		if strings.Contains(uuid, "-") {
+			return false
+		}
+		return true
+	} else {
+		return false
+	}
 }
 
 // Get environment variable
