@@ -84,6 +84,13 @@ func (c *Cli) GetInt(name string) int {
 	return *c.Args[name].(*int)
 }
 
+func (c *Cli) GetBool(name string) bool {
+	if _, ok := c.Args[name]; !ok {
+		return false
+	}
+	return *c.Args[name].(*string) == "true"
+}
+
 func (c *Cli) GetSeconds(name string) time.Duration {
 	val := c.GetInt(name)
 	if val == -1 {
