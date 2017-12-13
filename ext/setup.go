@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/SYNQfm/SYNQ-Golang/synq"
+	"github.com/SYNQfm/SYNQ-Golang/test_server"
 	"github.com/SYNQfm/helpers/common"
 	"github.com/jmoiron/sqlx"
 )
@@ -61,5 +62,12 @@ func SetupSynqApi(setup ...ApiSetup) (api synq.ApiF) {
 	if config.Url != "" {
 		api.SetUrl(config.Url)
 	}
+	return api
+}
+
+func SetupForTestV2() synq.ApiV2 {
+	url := test_server.SetupServer("v2")
+	api := synq.NewV2(test_server.TEST_AUTH)
+	api.SetUrl(url)
 	return api
 }
