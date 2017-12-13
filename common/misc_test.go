@@ -88,3 +88,11 @@ func TestGetMultipartSignature(t *testing.T) {
 	assert.Nil(err)
 	assert.Equal("TXUvxqMH7sUU/yLcOLrlh7C5su0=", mpsignature.Signature)
 }
+
+func TestValidUUID(t *testing.T) {
+	assert := assert.New(t)
+	assert.False(ValidUUID(""))
+	assert.False(ValidUUID("45d4063d00454c9fb21e5186a09c311"))
+	assert.True(ValidUUID("45d4063d00454c9fb21e5186a09c3115"))
+	assert.True(ValidUUID("9e9dc8c8-f705-41db-88da-b3034894deb9"))
+}
