@@ -55,9 +55,13 @@ func (r *Ret) Add(type_ string) {
 	r.CountMap[t] = r.CountMap[t] + 1
 }
 
-func (r *Ret) AddError(err error) {
-	r.Error = err
-	r.Add("errored")
+func (r *Ret) AddError(err error) bool {
+	if err != nil {
+		r.Error = err
+		r.Add("errored")
+		return true
+	}
+	return false
 }
 
 func (r *Ret) IsErrored() bool {
