@@ -202,7 +202,13 @@ func BytesVal(bytes int64) (int64, string) {
 	if bytes == 0 {
 		return 0, ""
 	}
-	b := bytes / (1000 * 1000)
+	meg := int64(1000 * 1000)
+	if bytes < 50000 {
+		return bytes, "B"
+	} else if bytes < meg {
+		return bytes / 1000, "KB"
+	}
+	b := bytes / meg
 	label := "MB"
 	if b > 500000 {
 		b = b / (1000 * 1000)
@@ -219,7 +225,7 @@ func (r *Ret) Speed() string {
 		secs, _ := r.Taken(time.Second)
 		b, l := BytesVal(bytes)
 		speed := (float64(b*8) / float64(secs))
-		return fmt.Sprintf("%d %s (speed %.1f %sps)", b, l, speed, l)
+		return fmt.Sprintf("%d %s (speed %.2f %sps)", b, l, speed, l)
 	} else {
 		return ""
 	}
@@ -249,11 +255,11 @@ func (r *Ret) String() string {
 			dStr = fmt.Sprintf("duration %d %s, avg %d %s", d, l, d2, l2)
 		}
 		if bStr != "" && dStr != "" {
-			str = str + "(" + bStr + ", " + dStr + ")"
+			str = str + " (" + bStr + ", " + dStr + ")"
 		} else if bStr != "" {
-			str = str + "( " + bStr + ")"
+			str = str + " ( " + bStr + ")"
 		} else if dStr != "" {
-			str = str + "( " + dStr + ")"
+			str = str + " ( " + dStr + ")"
 		}
 	}
 	str = str + "\n"
