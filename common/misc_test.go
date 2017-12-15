@@ -29,6 +29,18 @@ func TestRet(t *testing.T) {
 	assert.False(ret.Gt("count", 1))
 }
 
+func TestDuration(t *testing.T) {
+	assert := assert.New(t)
+	ret := NewRet("test")
+	ret.Add("videos")
+	ret.Add("videos")
+	ret.AddBytesFor("videos", 1000000)
+	ret.AddDurFor("videos", 1*time.Second)
+	str := ret.String()
+	log.Println(str)
+	assert.Contains(str, "videos 2 (1 MB, avg 500 KB, duration 1000 ms, avg 500 ms)")
+}
+
 func TestString(t *testing.T) {
 	assert := assert.New(t)
 	ret := NewRet("test")
@@ -42,12 +54,12 @@ func TestString(t *testing.T) {
 	ret.Start = ret.Start.Add(-1 * time.Hour)
 	str = ret.String()
 	log.Println(str)
-	assert.Contains(str, "1 megs (speed 0.1 mbps)")
+	assert.Contains(str, "1 MB (speed 0.00 MBps)")
 	assert.Contains(str, "took 60 mins")
 	ret.Start = ret.Start.Add(59 * time.Minute)
 	str = ret.String()
 	log.Println(str)
-	assert.Contains(str, "1 megs (speed 0.1 mbps)")
+	assert.Contains(str, "1 MB (speed 0.13 MBps)")
 	assert.Contains(str, "took 60 sec")
 }
 
