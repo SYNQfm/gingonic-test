@@ -14,16 +14,18 @@ import (
 
 type Ret struct {
 	Label    string
-	Bytes    int
 	CountMap map[string]int
 	Error    error
 	Start    time.Time
+	DurMap   map[string]time.Duration
+	BytesMap map[string]int64
 }
 
 func NewRet(label string) Ret {
 	return Ret{
 		Label:    label,
-		Bytes:    0,
+		DurMap:   make(map[string]time.Duration),
+		BytesMap: make(map[string]int64),
 		CountMap: make(map[string]int),
 		Error:    nil,
 		Start:    time.Now(),
@@ -43,16 +45,38 @@ func ParseType(type_ string) string {
 	return t
 }
 
-func (r *Ret) AddBytes(bytes int) {
-	r.Bytes = r.Bytes + bytes
+func (r *Ret) AddBytes(bytes int64) {
+	r.AddBytesFor("total", bytes)
+}
+
+func (r *Ret) AddBytesFor(key string, bytes int64) {
+	t := ParseType(key)
+	if _, ok := r.BytesMap[t]; !ok {
+		r.BytesMap[t] = bytes
+	} else {
+		r.BytesMap[t] = r.BytesMap[t] + bytes
+	}
+}
+
+func (r *Ret) AddDurFor(key string, dur time.Duration) {
+	t := ParseType(key)
+	if _, ok := r.DurMap[t]; !ok {
+		r.DurMap[t] = dur
+	} else {
+		r.DurMap[t] = r.DurMap[t] + dur
+	}
 }
 
 func (r *Ret) Add(type_ string) {
+	r.AddFor(type_, 1)
+}
+
+func (r *Ret) AddFor(type_ string, ct int) {
 	t := ParseType(type_)
 	if _, ok := r.CountMap[t]; !ok {
 		r.CountMap[t] = 0
 	}
-	r.CountMap[t] = r.CountMap[t] + 1
+	r.CountMap[t] = r.CountMap[t] + ct
 }
 
 func (r *Ret) AddError(err error) bool {
@@ -77,6 +101,25 @@ func (r *Ret) Value(type_ string) int {
 	return c
 }
 
+func (r *Ret) Bytes(type_ string) int64 {
+	t := ParseType(type_)
+	b, ok := r.BytesMap[t]
+	if !ok {
+		b = int64(0)
+	}
+	return b
+}
+
+func (r *Ret) Duration(type_ string) time.Duration {
+	t := ParseType(type_)
+	d, ok := r.DurMap[t]
+	if !ok {
+		d = time.Duration(0)
+	}
+	return d
+
+}
+
 func (r *Ret) Eq(type_ string, ct int) bool {
 	return r.Value(type_) == ct
 }
@@ -98,7 +141,9 @@ func (r *Ret) Lt(type_ string, ct int) bool {
 }
 
 func Label(dur time.Duration) string {
-	if dur == time.Minute {
+	if dur == time.Hour {
+		return "hrs"
+	} else if dur == time.Minute {
 		return "mins"
 	} else if dur == time.Second {
 		return "sec"
@@ -109,14 +154,26 @@ func Label(dur time.Duration) string {
 	}
 }
 
-// This will determine the right value to use
-func (r *Ret) Taken(tDur ...time.Duration) (int, string) {
-	var t time.Duration
-	dur := time.Since(r.Start)
-	if len(tDur) > 0 {
-		t = tDur[0]
+func DurFromLabel(label string) time.Duration {
+	if label == "hrs" {
+		return time.Hour
+	} else if label == "mins" {
+		return time.Minute
+	} else if label == "sec" {
+		return time.Second
+	} else if label == "ms" {
+		return time.Millisecond
+	} else {
+		return time.Nanosecond
 	}
-	if dur >= 1000*time.Second {
+
+}
+
+func DurVal(dur time.Duration) (int, string) {
+	var t time.Duration
+	if dur >= 1000*time.Minute {
+		t = time.Hour
+	} else if dur >= 1000*time.Second {
 		t = time.Minute
 	} else if dur >= 10000*time.Millisecond {
 		t = time.Second
@@ -129,19 +186,43 @@ func (r *Ret) Taken(tDur ...time.Duration) (int, string) {
 	return taken, Label(t)
 }
 
-func (r *Ret) Megs() int {
-	megs := r.Bytes / (1000 * 1000)
-	return megs
+// This will determine the right value to use
+func (r *Ret) Taken(tDur ...time.Duration) (int, string) {
+	dur := time.Since(r.Start)
+	if len(tDur) > 0 {
+		t := tDur[0]
+		taken := int(dur / t)
+		return taken, Label(t)
+	} else {
+		return DurVal(dur)
+	}
+}
+
+func BytesVal(bytes int64) (int64, string) {
+	if bytes == 0 {
+		return 0, ""
+	}
+	b := bytes / (1000 * 1000)
+	label := "MB"
+	if b > 500000 {
+		b = b / (1000 * 1000)
+		label = "TB"
+	} else if b > 5000 {
+		b = b / 1000
+		label = "GB"
+	}
+	return b, label
 }
 
 func (r *Ret) Speed() string {
-	secs, _ := r.Taken(time.Second)
-	megs := r.Megs()
-	if megs == 0 {
+	if bytes, ok := r.BytesMap["total"]; ok {
+		secs, _ := r.Taken(time.Second)
+		b, l := BytesVal(bytes)
+		speed := (float64(b*8) / float64(secs))
+		return fmt.Sprintf("%d %s (speed %.1f %sps)", b, l, speed, l)
+	} else {
 		return ""
 	}
-	speed := (float64(megs*8) / float64(secs))
-	return fmt.Sprintf("%d megs (speed %.1f mbps)", megs, speed)
 }
 
 func (r *Ret) String() string {
@@ -151,6 +232,29 @@ func (r *Ret) String() string {
 			continue
 		}
 		str = str + fmt.Sprintf(", %s %d", k, v)
+		bytes := r.Bytes(k)
+		dur := r.Duration(k)
+		bStr := ""
+		dStr := ""
+		if bytes > 0 {
+			avg := bytes / int64(v)
+			b, l := BytesVal(bytes)
+			a, l2 := BytesVal(avg)
+			bStr = fmt.Sprintf("%d %s, avg %d %s", b, l, a, l2)
+		}
+		if dur > 0 {
+			d, l := DurVal(dur)
+			avg := int(dur*time.Nanosecond) / v
+			d2, l2 := DurVal(time.Duration(avg))
+			dStr = fmt.Sprintf("duration %d %s, avg %d %s", d, l, d2, l2)
+		}
+		if bStr != "" && dStr != "" {
+			str = str + "(" + bStr + ", " + dStr + ")"
+		} else if bStr != "" {
+			str = str + "( " + bStr + ")"
+		} else if dStr != "" {
+			str = str + "( " + dStr + ")"
+		}
 	}
 	str = str + "\n"
 	s, l := r.Taken()
