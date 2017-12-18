@@ -139,8 +139,8 @@ func (r *Ret) Lt(type_ string, ct int) bool {
 	return r.Value(type_) < ct
 }
 
-func (r *ret) LimitReached(limit int) bool {
-	return r.Gte("count", limit) || ret.Get("errored", limit)
+func (r *Ret) LimitReached(limit int) bool {
+	return r.Gte("count", limit) || r.Gte("errored", limit)
 }
 
 func Label(dur time.Duration) string {
