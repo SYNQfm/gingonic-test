@@ -117,7 +117,6 @@ func (r *Ret) Duration(type_ string) time.Duration {
 		d = time.Duration(0)
 	}
 	return d
-
 }
 
 func (r *Ret) Eq(type_ string, ct int) bool {
@@ -138,6 +137,10 @@ func (r *Ret) Lte(type_ string, ct int) bool {
 
 func (r *Ret) Lt(type_ string, ct int) bool {
 	return r.Value(type_) < ct
+}
+
+func (r *Ret) LimitReached(limit int) bool {
+	return r.Gte("count", limit) || r.Gte("errored", limit)
 }
 
 func Label(dur time.Duration) string {
