@@ -20,10 +20,10 @@ type Client struct {
 	ProjectId  string
 	Collection string
 	HttpClient http.Client
-	Events     map[string][]Event
+	Events     map[string][]KeenEvent
 }
 
-type Event struct {
+type KeenEvent struct {
 	CDNEvent    CDNEvent    `json:"cdn_event"`
 	GeoLocation GeoLocation `json:"geo"`
 	Browser     Browser     `json:"browser"`
@@ -68,7 +68,7 @@ func Timestamp(t time.Time) string {
 	return t.UTC().Format("2006-01-02T15:04:05.000Z")
 }
 
-func (c *Client) AddEvent(event Event) (string, error) {
+func (c *Client) AddEvent(event KeenEvent) (string, error) {
 	resp, err := c.Request("POST", fmt.Sprintf("/events/%s", c.Collection), event)
 	if err != nil {
 		return "", err
@@ -77,7 +77,7 @@ func (c *Client) AddEvent(event Event) (string, error) {
 	return c.Response(resp)
 }
 
-func (c *Client) AddEvents(events map[string][]Event) (string, error) {
+func (c *Client) AddEvents(events map[string][]KeenEvent) (string, error) {
 	resp, err := c.Request("POST", "/events", events)
 	if err != nil {
 		return "", err
