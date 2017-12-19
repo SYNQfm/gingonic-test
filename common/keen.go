@@ -24,9 +24,14 @@ type Client struct {
 }
 
 type KeenEvent struct {
-	CDNEvent    CDNEvent    `json:"cdn_event"`
-	GeoLocation GeoLocation `json:"geo"`
-	Browser     Browser     `json:"browser"`
+	Keen        KeenProperties `json:"keen"`
+	CDNEvent    CDNEvent       `json:"cdn_event"`
+	GeoLocation GeoLocation    `json:"geo"`
+	Browser     Browser        `json:"browser"`
+}
+
+type KeenProperties struct {
+	Timestamp string `json:"timestamp"`
 }
 
 type CDNEvent struct {
