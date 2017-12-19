@@ -41,9 +41,9 @@ type CDNEvent struct {
 	ServerIP      string `json:"server_ip"`
 	Protocol      string `json:"protocol"`
 	Referrer      string `json:"referrer"`
-	Filesize      string `json:"filesize"`
-	BytesRequest  string `json:"bytes_request"`
-	BytesResponse string `json:"bytes_response"`
+	Filesize      int64  `json:"filesize"`
+	BytesRequest  int64  `json:"bytes_request"`
+	BytesResponse int64  `json:"bytes_response"`
 	Duration      string `json:"duration"`
 	StatusCode    string `json:"status"`
 	URI           string `json:"url"`
