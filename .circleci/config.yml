@@ -20,6 +20,7 @@ jobs:
             go get github.com/stretchr/testify/assert
             go get github.com/stretchr/testify/require
             go get github.com/jmoiron/sqlx
+            go get github.com/buger/jsonparser
       - run:
           name: Run Golang Tests
           command: |
