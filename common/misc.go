@@ -266,6 +266,9 @@ func (r *Ret) String() string {
 		}
 	}
 	str = str + "\n"
+	if r.Error != nil {
+		str = str + r.GetErrorString()
+	}
 	s, l := r.Taken()
 	speed := r.Speed()
 	if speed != "" {
@@ -273,6 +276,10 @@ func (r *Ret) String() string {
 	}
 	str = str + fmt.Sprintf("took %d %s%s", s, l, speed)
 	return str
+}
+
+func (r *Ret) GetErrorString() string {
+	return fmt.Sprintf("Error occured : %s\n", r.Error.Error())
 }
 
 // return 32 bytes into 36 bytes
