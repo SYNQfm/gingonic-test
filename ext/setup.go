@@ -66,7 +66,8 @@ func SetupSynqApi(setup ...ApiSetup) (api synq.ApiF) {
 }
 
 func SetupForTestV2() synq.ApiV2 {
-	url := test_server.SetupServer("v2")
+	server := test_server.SetupServer("v2")
+	url := server.GetUrl()
 	api := synq.NewV2(test_server.TEST_AUTH)
 	api.SetUrl(url)
 	return api
