@@ -235,7 +235,12 @@ func (r *Ret) Speed() string {
 }
 
 func (r *Ret) String() string {
-	str := fmt.Sprintf("for %s, processed %d/%d", r.Label, r.Value("ct"), r.Value("total"))
+	ct := r.Value("ct")
+	total := r.Value("total")
+	str := "for " + r.Label
+	if ct > 0 || total > 0 {
+		str = str + fmt.Sprintf(", processed %d/%d", ct, total)
+	}
 	for k, v := range r.CountMap {
 		if k == "count" || k == "total" {
 			continue

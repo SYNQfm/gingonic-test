@@ -17,6 +17,7 @@ jobs:
           command: |
             go get github.com/gin-gonic/gin
             go get github.com/SYNQfm/SYNQ-Golang/synq
+            go get github.com/SYNQfm/SYNQ-Golang/test_server
             go get github.com/stretchr/testify/assert
             go get github.com/stretchr/testify/require
             go get github.com/jmoiron/sqlx
