@@ -356,3 +356,12 @@ func GetMultipartSignature(headers, awsSecret string) []byte {
 func GetFileExtension(filetype string) string {
 	return strings.Split(strings.Split(filetype, "/")[1], "+")[0]
 }
+
+func FindString(list []string, find string) int {
+	for idx, item := range list {
+		if item == find {
+			return idx
+		}
+	}
+	return -1
+}
