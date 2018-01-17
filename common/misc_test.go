@@ -108,3 +108,12 @@ func TestValidUUID(t *testing.T) {
 	assert.True(ValidUUID("45d4063d00454c9fb21e5186a09c3115"))
 	assert.True(ValidUUID("9e9dc8c8-f705-41db-88da-b3034894deb9"))
 }
+
+func TestFind(t *testing.T) {
+	assert := assert.New(t)
+	list := []string{"a", "b", "c"}
+	assert.Equal(0, FindString(list, "a"))
+	assert.Equal(1, FindString(list, "b"))
+	assert.Equal(2, FindString(list, "c"))
+	assert.Equal(-1, FindString(list, "d"))
+}
