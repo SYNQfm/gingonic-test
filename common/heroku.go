@@ -11,7 +11,7 @@ import (
 
 const HEROKU_BASE_URL = "https://api.heroku.com/"
 
-func UpdateHerokuVar(authKey, appName string, config interface{}) interface{} {
+func UpdateHerokuVar(authKey, appName string, config interface{}) error {
 	herokuUrl := HEROKU_BASE_URL + "apps/" + appName + "/config-vars"
 
 	data, _ := json.Marshal(config)
@@ -19,15 +19,15 @@ func UpdateHerokuVar(authKey, appName string, config interface{}) interface{} {
 
 	req, err := makeRequest("PATCH", herokuUrl, authKey, body)
 	if err != nil {
-		return ""
+		return err
 	}
 
-	err = handleRequest(req, &config)
+	err = handleRequest(req, config)
 	if err != nil {
-		return ""
+		return err
 	}
 
-	return config
+	return nil
 }
 
 func makeRequest(method, url, token string, body io.Reader) (req *http.Request, err error) {
@@ -36,9 +36,7 @@ func makeRequest(method, url, token string, body io.Reader) (req *http.Request, 
 		log.Println("could not create request: ", err.Error())
 		return req, err
 	}
-	if token != "" {
-		req.Header.Add("Authorization", "Bearer "+token)
-	}
+	req.Header.Add("Authorization", "Bearer "+token)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/vnd.heroku+json; version=3")
 
@@ -68,5 +66,6 @@ func parseResponse(resp *http.Response, f interface{}) error {
 		log.Println("could not parse response: ", err.Error())
 		return NewError("could not parse : %s", string(responseAsBytes))
 	}
+
 	return nil
 }
