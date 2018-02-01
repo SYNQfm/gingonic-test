@@ -300,7 +300,7 @@ func ConvertToUUIDFormat(uuid string) string {
 	return fmt.Sprintf("%s-%s-%s-%s-%s", uuid[0:8], uuid[8:12], uuid[12:16], uuid[16:20], uuid[20:])
 }
 
-func ConverFromUUIDFormat(uuid string) string {
+func ConvertFromUUIDFormat(uuid string) string {
 	return strings.Replace(uuid, "-", "", -1)
 }
 
