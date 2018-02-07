@@ -18,7 +18,7 @@ func TestNewCli(t *testing.T) {
 func TestDefaultCli(t *testing.T) {
 	assert := assert.New(t)
 	cli := NewCli()
-	cli.DefaultSetup("test", "this is my command")
+	cli.DefaultSetup("this is my command", "test")
 	cli.Parse([]string{})
 	assert.Equal("test", cli.GetString("command"))
 	assert.Equal(120, cli.GetInt("timeout"))
