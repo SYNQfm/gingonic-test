@@ -72,13 +72,6 @@ func TestConvert(t *testing.T) {
 	assert.Equal("45d4062f-9945-4c9f-b21e-5186a09c2119", vid2)
 }
 
-func TestGetFileExtension(t *testing.T) {
-	log.Println("Testing GetFileExtension")
-	assert := assert.New(t)
-	ext := GetFileExtension("video/mp4")
-	assert.Equal("mp4", ext)
-}
-
 func TestGetAwsSignature(t *testing.T) {
 	log.Println("Testing getAwsSignature")
 	assert := assert.New(t)
@@ -116,4 +109,27 @@ func TestFind(t *testing.T) {
 	assert.Equal(1, FindString(list, "b"))
 	assert.Equal(2, FindString(list, "c"))
 	assert.Equal(-1, FindString(list, "d"))
+}
+
+func TestExtToCtype(t *testing.T) {
+	assert := assert.New(t)
+	assert.Equal("video/mp4", ExtToCtype(".mp4"))
+	assert.Equal("application/xml", ExtToCtype(".xml"))
+	assert.Equal("application/ttml+xml", ExtToCtype(".ttml"))
+	assert.Equal("application/x-subrip", ExtToCtype(".srt"))
+}
+
+func TestCtypeToExt(t *testing.T) {
+	assert := assert.New(t)
+	assert.Equal(".mp4", CtypeToExt("video/mp4"))
+	assert.Equal(".xml", CtypeToExt("application/xml")
+	assert.Equal(".ttml", CtypeToExt("application/ttml+xml"))
+	assert.Equal(".srt", CtypeToExt("application/x-subrip"))
+}
+
+func TestGetFileExtension(t *testing.T) {
+	log.Println("Testing GetFileExtension")
+	assert := assert.New(t)
+	ext := GetFileExtension("video/mp4")
+	assert.Equal("mp4", ext)
 }
