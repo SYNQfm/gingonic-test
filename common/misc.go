@@ -375,13 +375,17 @@ func CtypeToExt(ctype string) string {
 		return ".ttml"
 	case "application/x-subrip":
 		return ".srt"
+	case "application/xml":
+		return ".xml"
+	case "video/mp4":
+		return ".mp4"
 	}
 	return ""
 }
 
 func ExtToCtype(ext string) string {
 	ctype := mime.TypeByExtension(ext)
-	if ctype != "" && strings.Contains(ctype, "text/plain") {
+	if ctype != "" && !strings.Contains(ctype, "text/plain") {
 		return ctype
 	}
 	switch ext {
@@ -389,6 +393,10 @@ func ExtToCtype(ext string) string {
 		return "application/ttml+xml"
 	case ".srt":
 		return "application/x-subrip"
+	case ".mp4":
+		return "video/mp4"
+	case ".xml":
+		return "application/xml"
 	}
 	return ""
 }
