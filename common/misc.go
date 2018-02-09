@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"mime"
 	"os"
 	"strings"
 	"time"
@@ -353,8 +354,51 @@ func GetMultipartSignature(headers, awsSecret string) []byte {
 	return signature
 }
 
-func GetFileExtension(filetype string) string {
-	return strings.Split(strings.Split(filetype, "/")[1], "+")[0]
+func GetFileExtension(ctype string) string {
+	ext := CtypeToExt(ctype)
+	if ext == "" {
+		return ext
+	}
+	return strings.Split(ext, ".")[1]
+}
+
+func CtypeToExt(ctype string) string {
+	exts, err := mime.ExtensionsByType(ctype)
+	if err != nil {
+		return ""
+	}
+	if len(exts) > 0 {
+		return exts[0]
+	}
+	switch ctype {
+	case "application/ttml+xml":
+		return ".ttml"
+	case "application/x-subrip":
+		return ".srt"
+	case "application/xml":
+		return ".xml"
+	case "video/mp4":
+		return ".mp4"
+	}
+	return ""
+}
+
+func ExtToCtype(ext string) string {
+	ctype := mime.TypeByExtension(ext)
+	if ctype != "" && !strings.Contains(ctype, "text/plain") {
+		return ctype
+	}
+	switch ext {
+	case ".ttml":
+		return "application/ttml+xml"
+	case ".srt":
+		return "application/x-subrip"
+	case ".mp4":
+		return "video/mp4"
+	case ".xml":
+		return "application/xml"
+	}
+	return ""
 }
 
 func FindString(list []string, find string) int {
