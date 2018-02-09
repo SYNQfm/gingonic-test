@@ -122,7 +122,7 @@ func TestExtToCtype(t *testing.T) {
 func TestCtypeToExt(t *testing.T) {
 	assert := assert.New(t)
 	assert.Equal(".mp4", CtypeToExt("video/mp4"))
-	assert.Equal(".xml", CtypeToExt("application/xml")
+	assert.Equal(".xml", CtypeToExt("application/xml"))
 	assert.Equal(".ttml", CtypeToExt("application/ttml+xml"))
 	assert.Equal(".srt", CtypeToExt("application/x-subrip"))
 }
@@ -130,6 +130,8 @@ func TestCtypeToExt(t *testing.T) {
 func TestGetFileExtension(t *testing.T) {
 	log.Println("Testing GetFileExtension")
 	assert := assert.New(t)
-	ext := GetFileExtension("video/mp4")
-	assert.Equal("mp4", ext)
+	assert.Equal("mp4", GetFileExtension("video/mp4"))
+	assert.Equal("xml", GetFileExtension("application/xml"))
+	assert.Equal("ttml", GetFileExtension("application/ttml+xml"))
+	assert.Equal("srt", GetFileExtension("application/x-subrip"))
 }
