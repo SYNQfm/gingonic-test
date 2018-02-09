@@ -373,18 +373,22 @@ func CtypeToExt(ctype string) string {
 	switch ctype {
 	case "application/ttml+xml":
 		return ".ttml"
+	case "application/x-subrip":
+		return ".srt"
 	}
 	return ""
 }
 
 func ExtToCtype(ext string) string {
 	ctype := mime.TypeByExtension(ext)
-	if ctype != "" {
+	if ctype != "" && strings.Contains(ctype, "text/plain") {
 		return ctype
 	}
 	switch ext {
 	case ".ttml":
 		return "application/ttml+xml"
+	case ".srt":
+		return "application/x-subrip"
 	}
 	return ""
 }
