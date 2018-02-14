@@ -363,6 +363,7 @@ func GetFileExtension(ctype string) string {
 }
 
 func CtypeToExt(ctype string) string {
+	ctype = CleanCtype(ctype)
 	exts, err := mime.ExtensionsByType(ctype)
 	if err != nil {
 		return ""
@@ -383,10 +384,14 @@ func CtypeToExt(ctype string) string {
 	return ""
 }
 
+func CleanCtype(ctype string) string {
+	return strings.Split(ctype, ";")[0]
+}
+
 func ExtToCtype(ext string) string {
 	ctype := mime.TypeByExtension(ext)
 	if ctype != "" && !strings.Contains(ctype, "text/plain") {
-		return ctype
+		return CleanCtype(ctype)
 	}
 	switch ext {
 	case ".ttml":
