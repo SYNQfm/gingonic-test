@@ -76,7 +76,7 @@ func Timestamp(t time.Time) string {
 func (c *KeenClient) AddEvent(event KeenEvent) ([]byte, error) {
 	resp, err := c.Request("POST", fmt.Sprintf("/events/%s", c.Collection), event)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	return c.Response(resp)
@@ -85,7 +85,7 @@ func (c *KeenClient) AddEvent(event KeenEvent) ([]byte, error) {
 func (c *KeenClient) AddEvents(events map[string][]KeenEvent) ([]byte, error) {
 	resp, err := c.Request("POST", "/events", events)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	return c.Response(resp)
@@ -96,7 +96,7 @@ func (c *KeenClient) Response(resp *http.Response) ([]byte, error) {
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	response := data
 
