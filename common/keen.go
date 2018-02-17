@@ -14,7 +14,7 @@ const (
 	baseUrl = "https://api.keen.io/3.0/projects/"
 )
 
-type Client struct {
+type KeenClient struct {
 	WriteKey   string
 	ReadKey    string
 	ProjectId  string
@@ -73,7 +73,7 @@ func Timestamp(t time.Time) string {
 	return t.UTC().Format("2006-01-02T15:04:05.000Z")
 }
 
-func (c *Client) AddEvent(event KeenEvent) (string, error) {
+func (c *KeenClient) AddEvent(event KeenEvent) ([]byte, error) {
 	resp, err := c.Request("POST", fmt.Sprintf("/events/%s", c.Collection), event)
 	if err != nil {
 		return "", err
@@ -82,7 +82,7 @@ func (c *Client) AddEvent(event KeenEvent) (string, error) {
 	return c.Response(resp)
 }
 
-func (c *Client) AddEvents(events map[string][]KeenEvent) (string, error) {
+func (c *KeenClient) AddEvents(events map[string][]KeenEvent) ([]byte, error) {
 	resp, err := c.Request("POST", "/events", events)
 	if err != nil {
 		return "", err
@@ -91,23 +91,23 @@ func (c *Client) AddEvents(events map[string][]KeenEvent) (string, error) {
 	return c.Response(resp)
 }
 
-func (c *Client) Response(resp *http.Response) (string, error) {
+func (c *KeenClient) Response(resp *http.Response) ([]byte, error) {
 	defer resp.Body.Close()
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
-	response := string(data)
+	response := data
 
 	if resp.StatusCode != 200 {
-		response = strconv.Itoa(resp.StatusCode) + " " + resp.Status
+		response = []byte(strconv.Itoa(resp.StatusCode) + " " + resp.Status)
 	}
 
 	return response, nil
 }
 
-func (c *Client) Request(method, path string, payload interface{}) (*http.Response, error) {
+func (c *KeenClient) Request(method, path string, payload interface{}) (*http.Response, error) {
 	// serialize payload
 	body, err := json.Marshal(payload)
 	if err != nil {
