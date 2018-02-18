@@ -135,3 +135,11 @@ func TestGetFileExtension(t *testing.T) {
 	assert.Equal("ttml", GetFileExtension("application/ttml+xml"))
 	assert.Equal("srt", GetFileExtension("application/x-subrip"))
 }
+
+func TestEmptyJson(t *testing.T) {
+	assert := assert.New(t)
+	assert.True(EmptyJson(nil))
+	assert.True(EmptyJson([]byte{}))
+	assert.True(EmptyJson([]byte(`null`)))
+	assert.False(EmptyJson([]byte(`{}`)))
+}
