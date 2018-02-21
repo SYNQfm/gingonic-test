@@ -120,7 +120,7 @@ func (c *KeenClient) Request(method, path string, payload interface{}) (*http.Re
 	if keenUrl == "" {
 		keenUrl = baseUrl
 	}
-	url := keenUrl + c.ProjectId + path
+	url := keenUrl + "/" + c.ProjectId + path
 
 	// new request
 	req, err := http.NewRequest(method, url, bytes.NewReader(body))
