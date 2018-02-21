@@ -19,6 +19,7 @@ type KeenClient struct {
 	ReadKey    string
 	ProjectId  string
 	Collection string
+	Url        string
 	HttpClient http.Client
 	Events     map[string][]KeenEvent
 }
@@ -115,7 +116,11 @@ func (c *KeenClient) Request(method, path string, payload interface{}) (*http.Re
 	}
 
 	// construct url
-	url := baseUrl + c.ProjectId + path
+	keenUrl := c.Url
+	if keenUrl == "" {
+		keenUrl = baseUrl
+	}
+	url := keenUrl + c.ProjectId + path
 
 	// new request
 	req, err := http.NewRequest(method, url, bytes.NewReader(body))
