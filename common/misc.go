@@ -426,7 +426,7 @@ func EmptyJson(val json.RawMessage) bool {
 }
 
 // Check if v2 token is expired or not
-func validV2Token(token string) bool {
+func ValidV2Token(token string) bool {
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 { //header, payload, signature
 		log.Println("Invalid JWT structure")
