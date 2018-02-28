@@ -424,3 +424,31 @@ func EmptyJson(val json.RawMessage) bool {
 	}
 	return false
 }
+
+// Check if v2 token is expired or not
+func validV2Token(token string) bool {
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 { //header, payload, signature
+		log.Println("Invalid JWT structure")
+		return false
+	}
+
+	// get payload value, which contains expiry information
+	payload, err := base64.StdEncoding.DecodeString(parts[1])
+	if err != nil {
+		log.Println("Error decoding token: ", err.Error())
+		return false
+	}
+
+	data := struct {
+		Expiry int64 `json:"exp"`
+	}{}
+	json.Unmarshal(payload, &data)
+
+	currentTime := time.Now().Unix()
+	if data.Expiry < currentTime {
+		return false
+	}
+
+	return true
+}
