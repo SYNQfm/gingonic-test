@@ -439,7 +439,10 @@ func validV2Token(token string) bool {
 		log.Println("Error decoding token: ", err.Error())
 		return false
 	}
-	data := JwtData{}
+
+	data := struct {
+		Expiry int64 `json:"exp"`
+	}{}
 	json.Unmarshal(payload, &data)
 
 	currentTime := time.Now().Unix()
