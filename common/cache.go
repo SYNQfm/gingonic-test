@@ -4,16 +4,22 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"time"
 )
 
 type Cacheable interface {
 	GetCacheFile(string) string
+	GetCacheAge() time.Duration
 }
 
 func LoadFromCache(name string, c Cacheable, obj interface{}) bool {
 	cacheFile := c.GetCacheFile(name)
 	if cacheFile != "" {
-		if _, e := os.Stat(cacheFile); e == nil {
+		if i, e := os.Stat(cacheFile); e == nil {
+			if time.Since(i.ModTime()) >= c.GetCacheAge() {
+				// do not load it as its too old
+				return false
+			}
 			//log.Printf("loading from cached file %s\n", cacheFile)
 			bytes, _ := ioutil.ReadFile(cacheFile)
 			json.Unmarshal(bytes, obj)
