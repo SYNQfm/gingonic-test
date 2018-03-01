@@ -21,6 +21,7 @@ type Cli struct {
 	Simulate bool
 	Limit    int
 	CacheDir string
+	CacheAge time.Duration
 	Flag     *flag.FlagSet
 	Args     map[string]interface{}
 }
@@ -39,6 +40,7 @@ func (c *Cli) DefaultSetup(msg, def string) {
 	c.Int("timeout", 120, "timeout to use for API call, in seconds, defaults to 120")
 	c.Int("limit", 10, "number of actions to run")
 	c.String("cache_dir", "", "cache dir to use for saved values")
+	c.Int("cache_age", 120, "the time in hours to respect the cache")
 }
 
 func (c Cli) Println(msg string) {
@@ -57,6 +59,10 @@ func (c Cli) GetCacheFile(name string) string {
 		return ""
 	}
 	return c.CacheDir + "/" + name + ".json"
+}
+
+func (c Cli) GetCacheAge() time.Duration {
+	return c.CacheAge
 }
 
 func (c *Cli) String(name, def, desc string) {
@@ -88,11 +94,15 @@ func (c *Cli) GetBool(name string) bool {
 }
 
 func (c *Cli) GetSeconds(name string) time.Duration {
+	return c.GetTime(name, time.Second)
+}
+
+func (c *Cli) GetTime(name string, dur time.Duration) time.Duration {
 	val := c.GetInt(name)
 	if val == -1 {
 		return -1
 	}
-	return time.Duration(val) * time.Second
+	return time.Duration(val) * dur
 }
 
 func (c *Cli) GetSleep() time.Duration {
@@ -125,6 +135,7 @@ func (c *Cli) Parse(args ...[]string) {
 	c.Limit = c.GetInt("limit")
 	c.CacheDir = c.GetString("cache_dir")
 	c.Sleep = c.GetSeconds("sleep")
+	c.CacheAge = c.GetTime("cache_age", time.Hour)
 }
 
 func (c *Cli) GetFilter(fta ...string) (filter string, filterType string) {
