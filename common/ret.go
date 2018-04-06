@@ -1,7 +1,10 @@
 package common
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"time"
 )
 
@@ -12,6 +15,7 @@ type Ret struct {
 	Start    time.Time
 	DurMap   map[string]time.Duration
 	BytesMap map[string]int64
+	IdMap    map[string][]string
 }
 
 func NewRet(label string) Ret {
@@ -57,6 +61,14 @@ func (r *Ret) AddFor(type_ string, ct int) {
 		r.CountMap[t] = 0
 	}
 	r.CountMap[t] = r.CountMap[t] + ct
+}
+
+func (r *Ret) AddForSave(key string, id string) {
+	t := ParseType(key)
+	if _, ok := r.IdMap[t]; !ok {
+		r.IdMap[t] = []string{}
+	}
+	r.IdMap[t] = append(r.IdMap[t], id)
 }
 
 func (r *Ret) AddError(err error) bool {
@@ -197,4 +209,17 @@ func (r *Ret) String() string {
 
 func (r *Ret) GetErrorString() string {
 	return fmt.Sprintf("Error occured : %s\n", r.Error.Error())
+}
+
+// This will save any id entries to disk
+func (r *Ret) Save(dir string) error {
+	for name, list := range r.IdMap {
+		file := fmt.Sprintf("%s/%s.json", dir, name)
+		log.Printf("Saving %d ids to %s", len(list), file)
+		data, _ := json.Marshal(list)
+		if err := ioutil.WriteFile(file, data, 0755); err != nil {
+			return err
+		}
+	}
+	return nil
 }
