@@ -26,6 +26,7 @@ func NewRet(label string) Ret {
 		CountMap: make(map[string]int),
 		Error:    nil,
 		Start:    time.Now(),
+		IdMap:    make(map[string][]string),
 	}
 }
 
