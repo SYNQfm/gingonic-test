@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -218,8 +220,13 @@ func (r *Ret) Print() {
 
 // This will save any id entries to disk
 func (r *Ret) Save(dir string) error {
+	subDir := strings.Replace(r.Label, " ", "-", -1)
+	d := dir + "/" + subDir
+	if e := os.MkdirAll(d, 0755); e != nil {
+		return e
+	}
 	for name, list := range r.IdMap {
-		file := fmt.Sprintf("%s/%s.json", dir, name)
+		file := fmt.Sprintf("%s/%s.json", d, name)
 		log.Printf("Saving %d ids to %s", len(list), file)
 		data, _ := json.Marshal(list)
 		if err := ioutil.WriteFile(file, data, 0755); err != nil {
