@@ -211,6 +211,10 @@ func (r *Ret) GetErrorString() string {
 	return fmt.Sprintf("Error occured : %s\n", r.Error.Error())
 }
 
+func (r *Ret) Print() {
+	log.Println(r.String())
+}
+
 // This will save any id entries to disk
 func (r *Ret) Save(dir string) error {
 	for name, list := range r.IdMap {
