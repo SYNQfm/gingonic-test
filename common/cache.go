@@ -16,7 +16,7 @@ func LoadFromCache(name string, c Cacheable, obj interface{}) bool {
 	cacheFile := c.GetCacheFile(name)
 	if cacheFile != "" {
 		if i, e := os.Stat(cacheFile); e == nil {
-			if time.Since(i.ModTime()) >= c.GetCacheAge() {
+			if c.GetCacheAge() < 0 || time.Since(i.ModTime()) >= c.GetCacheAge() {
 				// do not load it as its too old
 				return false
 			}
