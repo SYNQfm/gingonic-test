@@ -3,10 +3,10 @@ package common
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -101,8 +101,8 @@ func (c *KeenClient) Response(resp *http.Response) ([]byte, error) {
 	}
 	response := data
 
-	if resp.StatusCode != 200 {
-		response = []byte(strconv.Itoa(resp.StatusCode) + " " + resp.Status)
+	if resp.StatusCode > 201 {
+		return response, errors.New(resp.Status)
 	}
 
 	return response, nil
