@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	baseUrl = "https://api.keen.io/3.0/projects/"
+	baseUrl = "https://api.keen.io/3.0/projects"
 )
 
 type KeenClient struct {
