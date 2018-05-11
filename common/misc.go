@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"log"
 	"mime"
+	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -257,4 +259,32 @@ func ValidV2Token(token string) bool {
 	}
 
 	return true
+}
+
+func GetDir(u string) string {
+	uri, _ := url.Parse(u)
+	dir := filepath.Dir(uri.Path)
+	return dir
+}
+
+func GetTypeByExt(ext string) string {
+	switch ext {
+	case "mpd":
+		return "dash"
+	case "ism":
+		return "smooth"
+	default:
+		return "hls"
+	}
+}
+
+func GetExtByType(assetType string) string {
+	switch assetType {
+	case "dash":
+		return "mpd"
+	case "smooth":
+		return "ism"
+	default:
+		return "m3u8"
+	}
 }
