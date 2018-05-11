@@ -143,3 +143,30 @@ func TestEmptyJson(t *testing.T) {
 	assert.True(EmptyJson([]byte(`null`)))
 	assert.False(EmptyJson([]byte(`{}`)))
 }
+
+func TestGetDir(t *testing.T) {
+	assert := assert.New(t)
+	srcUrl := "s3://synq-frankfurt/videos/9e/9d/9e9dc8c8-f705-41db-88da-b3034894deb9/hls/master_manifest.m3u8"
+	dir := GetDir(srcUrl)
+	assert.Equal("/videos/9e/9d/9e9dc8c8-f705-41db-88da-b3034894deb9/hls", dir)
+}
+
+func TestGetTypeByExt(t *testing.T) {
+	assert := assert.New(t)
+	ftype := GetTypeByExt("mpd")
+	assert.Equal("dash", ftype)
+	ftype = GetTypeByExt("ism")
+	assert.Equal("smooth", ftype)
+	ftype = GetTypeByExt("")
+	assert.Equal("hls", ftype)
+}
+
+func TestGetExtByType(t *testing.T) {
+	assert := assert.New(t)
+	ext := GetExtByType("dash")
+	assert.Equal("mpd", ext)
+	ext = GetExtByType("smooth")
+	assert.Equal("ism", ext)
+	ext = GetExtByType("hls")
+	assert.Equal("m3u8", ext)
+}
