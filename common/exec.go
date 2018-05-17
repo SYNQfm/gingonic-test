@@ -2,11 +2,15 @@ package common
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
+	"syscall"
 )
 
 type ExecObj struct {
@@ -138,4 +142,30 @@ func (e *ExecObj) MarshalError() (body []byte) {
 		return body
 	}
 	return body
+}
+
+func CheckPid(pidFile string) (int, error) {
+	currentPid := os.Getpid()
+	if _, err := os.Stat(pidFile); err == nil {
+		bytes, _ := ioutil.ReadFile(pidFile)
+		pid, _ := strconv.ParseInt(string(bytes), 10, 64)
+		if currentPid == int(pid) {
+			log.Printf("this is pid %d, ok to proceed", pid)
+			return currentPid, nil
+		}
+		process, _ := os.FindProcess(int(pid))
+		err := process.Signal(syscall.Signal(0))
+		pidExists := true
+		if err != nil {
+			if strings.Contains(err.Error(), "already finished") || strings.Contains(err.Error(), "no such process") {
+				log.Printf("could not find pid %d, allow to process", pid)
+				pidExists = false
+			}
+		}
+		if pidExists {
+			return int(pid), NewError("Pid '%d' already exists, will not run", pid)
+		}
+	}
+	ioutil.WriteFile(pidFile, []byte(fmt.Sprintf("%d", currentPid)), 0644)
+	return currentPid, nil
 }
