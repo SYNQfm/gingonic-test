@@ -291,7 +291,8 @@ func GetExtByType(assetType string) string {
 	}
 }
 
-func GenerateMD5(file []byte, fileSize, maxSize int64) (hash string, hashSize int64) {
+func GenerateMD5(file io.Reader, fileSize, maxSize int64) (hash string, hashSize int64) {
+	var err error
 	h := md5.New()
 	hashSize = fileSize
 	if fileSize > maxSize {
