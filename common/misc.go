@@ -2,10 +2,12 @@ package common
 
 import (
 	"crypto/hmac"
+	"crypto/md5"
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"mime"
 	"net/url"
@@ -287,4 +289,21 @@ func GetExtByType(assetType string) string {
 	default:
 		return "m3u8"
 	}
+}
+
+func GenerateMD5(file []byte, fileSize, maxSize int64) (hash string, hashSize int64) {
+	h := md5.New()
+	hashSize = fileSize
+	if fileSize > maxSize {
+		_, err = io.CopyN(h, file, maxSize)
+		hashSize = maxSize
+	} else {
+		_, err = io.Copy(h, file)
+	}
+	if err != nil && err != io.EOF {
+		log.Println(err.Error())
+		return hash, hashSize
+	}
+	hash = fmt.Sprintf("%x", h.Sum(nil))
+	return hash, hashSize
 }
