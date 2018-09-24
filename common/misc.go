@@ -244,7 +244,7 @@ func ValidV2Token(token string) bool {
 	}
 
 	// get payload value, which contains expiry information
-	payload, err := base64.StdEncoding.DecodeString(parts[1])
+	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
 	if err != nil {
 		log.Println("Error decoding token: ", err.Error())
 		return false
