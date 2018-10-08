@@ -282,7 +282,7 @@ func GetTypeByExt(ext string) string {
 
 func GetExtByType(assetType string) string {
 	switch assetType {
-	case "dash":
+	case "dash", "trailer-dash":
 		return "mpd"
 	case "smooth":
 		return "ism"
