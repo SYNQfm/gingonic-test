@@ -15,6 +15,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/buger/jsonparser"
 )
 
 func ParseType(type_ string) string {
@@ -307,4 +309,10 @@ func GenerateMD5(file io.Reader, fileSize, maxSize int64) (hash string, hashSize
 	}
 	hash = fmt.Sprintf("%x", h.Sum(nil))
 	return hash, hashSize
+}
+
+// Parses the metadata and returns the value of the specified field
+func getMetadataStringVal(metadata json.RawMessage, field string) string {
+	value, _ := jsonparser.GetString(metadata, field)
+	return value
 }
