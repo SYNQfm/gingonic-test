@@ -312,7 +312,7 @@ func GenerateMD5(file io.Reader, fileSize, maxSize int64) (hash string, hashSize
 }
 
 // Parses the metadata and returns the value of the specified field
-func getMetadataStringVal(metadata json.RawMessage, field string) string {
+func GetMetadataStringVal(metadata json.RawMessage, field string) string {
 	value, _ := jsonparser.GetString(metadata, field)
 	return value
 }
