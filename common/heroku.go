@@ -3,6 +3,7 @@ package common
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -10,6 +11,11 @@ import (
 )
 
 const HEROKU_BASE_URL = "https://api.heroku.com/"
+
+type HerokuResponse struct {
+	Id      string `json:"id"`
+	Message string `json:"message"`
+}
 
 func UpdateHerokuVar(authKey, appName string, config interface{}) error {
 	herokuUrl := HEROKU_BASE_URL + "apps/" + appName + "/config-vars"
@@ -22,7 +28,7 @@ func UpdateHerokuVar(authKey, appName string, config interface{}) error {
 		return err
 	}
 
-	err = handleRequest(req, config)
+	err = handleRequest(req)
 	if err != nil {
 		return err
 	}
@@ -43,28 +49,33 @@ func makeRequest(method, url, token string, body io.Reader) (req *http.Request, 
 	return req, nil
 }
 
-func handleRequest(req *http.Request, f interface{}) error {
+func handleRequest(req *http.Request) error {
 	httpClient := &http.Client{}
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		log.Println("could not make http request: ", err.Error())
 		return err
 	}
-	return parseResponse(resp, f)
+	return parseResponse(resp)
 }
 
-func parseResponse(resp *http.Response, f interface{}) error {
+func parseResponse(resp *http.Response) error {
 	defer resp.Body.Close()
-	responseAsBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println("could not read resp body", err.Error())
-		return err
-	}
 
-	err = json.Unmarshal(responseAsBytes, &f)
-	if err != nil {
-		log.Println("could not parse response: ", err.Error())
-		return NewError("could not parse : %s", string(responseAsBytes))
+	if resp.StatusCode != 200 {
+		responseAsBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("could not read resp body", err.Error())
+			return err
+		}
+
+		hResp := HerokuResponse{}
+		err = json.Unmarshal(responseAsBytes, &hResp)
+		if err != nil {
+			return err
+		}
+
+		return fmt.Errorf("%d: %s", resp.StatusCode, hResp.Message)
 	}
 
 	return nil
