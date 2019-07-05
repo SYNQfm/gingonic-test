@@ -1,100 +1,103 @@
 package common
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
-
-	"github.com/sendgrid/sendgrid-go"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"io/ioutil"
+	"net/http"
+	"reflect"
 )
 
-const DEFAULT_SYNQ_EMAIL_SUBJECT = "SYNQ Email Notification"
+const ERIS_STAGING_URL = "https://4oiv2vbc7l.execute-api.eu-central-1.amazonaws.com/stage/eris"
+
+var serviceUrl string
 
 type Email struct {
-	ApiKey   string `json:"api_key"`
 	Request  EmailRequest
-	Response []EmailResponse
+	Response EmailResponse
 }
 
 type EmailRequest struct {
-	Sender        map[string]string `json:"sender"`
-	Recipients    map[string]string `json:"recipients"`
-	Subject       string            `json:"subject"`
-	EmailBody     string            `json:"body"`
-	EmailHtmlBody string            `json:"html_body"`
+	Service   string                 `json:"service"`
+	EmailType string                 `json:"email_type"` // ERROR, INFO, or if template, use template ID
+	Message   string                 `json:"message"`    // required for ERROR or INFO
+	Body      map[string]interface{} `json:"body"`       // required except for ERROR and INFO
 }
 
 type EmailResponse struct {
 	StatusCode int
-	Body       string
-	Headers    map[string][]string
+	Message    string
+	Errors     map[string][]string
 }
 
-func prepareEmailList(list map[string]string) (emails []*mail.Email) {
-	for address, name := range list {
-		emails = append(emails, mail.NewEmail(name, address))
-	}
-	return emails
+func init() {
+	serviceUrl = GetOsEnv("ERIS_URL", false, ERIS_STAGING_URL)
 }
 
 func NewEmail() Email {
 	return Email{
 		Request:  EmailRequest{},
-		Response: []EmailResponse{},
+		Response: EmailResponse{},
 	}
 }
 
-func (e Email) Validate() (errors []error) {
-	if e.ApiKey == "" {
-		errors = append(errors, fmt.Errorf("Missing SendGrid API Key."))
+func (e Email) Validate() error {
+	if reflect.DeepEqual(e.Request, EmailRequest{}) {
+		return fmt.Errorf("[Validate] Cannot send empty request!")
 	}
 
-	if len(e.Request.Sender) < 1 {
-		errors = append(errors, fmt.Errorf("Missing Sender value."))
+	if e.Request.Service == "" {
+		return fmt.Errorf("[Validate] Missing microservice name.")
 	}
 
-	if len(e.Request.Recipients) < 1 {
-		errors = append(errors, fmt.Errorf("There must be one or more recipient addresses."))
+	if e.Request.EmailType == "" {
+		return fmt.Errorf("[Validate] Missing email type.")
 	}
 
-	if e.Request.EmailBody == "" {
-		errors = append(errors, fmt.Errorf("The content value must be a string at least one character in length."))
-	}
-
-	return errors
-}
-
-func (e *Email) Send() []error {
-	errors := e.Validate()
-	if len(errors) > 0 {
-		return errors
-	}
-
-	client := sendgrid.NewSendClient(e.ApiKey)
-	from := prepareEmailList(e.Request.Sender)[0]
-	recipients := prepareEmailList(e.Request.Recipients)
-	subject := e.Request.Subject
-	if subject == "" {
-		subject = DEFAULT_SYNQ_EMAIL_SUBJECT
-	}
-	plainTextContent := e.Request.EmailBody
-	htmlContent := e.Request.EmailHtmlBody
-	if htmlContent == "" {
-		htmlContent = plainTextContent
-	}
-
-	for _, to := range recipients {
-		message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-		response, err := client.Send(message)
-		if err != nil {
-			errors = append(errors, err)
-		} else {
-			e.Response = append(e.Response, EmailResponse{
-				StatusCode: response.StatusCode,
-				Body:       response.Body,
-				Headers:    response.Headers,
-			})
+	emailType := e.Request.EmailType
+	if emailType == "ERROR" || emailType == "INFO" {
+		if e.Request.Message == "" {
+			return fmt.Errorf("[Validate] Request Message cannot be empty for ERROR or INFO email type.")
+		}
+	} else {
+		if len(e.Request.Body) == 0 {
+			return fmt.Errorf("[Validate] Request Body cannot be empty for %s email type.", emailType)
 		}
 	}
 
-	return errors
+	return nil
+}
+
+func (e *Email) Send() error {
+	err := e.Validate()
+	if err != nil {
+		return err
+	}
+
+	b, _ := json.Marshal(e.Request)
+	body := bytes.NewBuffer(b)
+
+	fmt.Printf("[INFO][Send] Calling email service %s with values: %s\n", serviceUrl, string(b))
+	req, err := http.NewRequest("POST", serviceUrl, body)
+	if err != nil {
+		return fmt.Errorf("[Send] Error creating request %s: %s", string(b), err.Error())
+	}
+	httpClient := &http.Client{}
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("[Send] Error with request %s: %s", string(b), err.Error())
+	}
+	defer resp.Body.Close()
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("[Send] Error reading response for request %s: %s", string(b), err.Error())
+	}
+
+	err = json.Unmarshal(respBody, &e.Response)
+	if err != nil {
+		return fmt.Errorf("[Send] Error unmarshalling response %s: %s", string(respBody), err.Error())
+	}
+
+	return nil
 }
