@@ -26,9 +26,9 @@ type EmailRequest struct {
 }
 
 type EmailResponse struct {
-	StatusCode int
-	Message    string
-	Errors     map[string][]string
+	StatusCode int                 `json:"statusCode"`
+	Message    string              `json:"message"`
+	Errors     map[string][]string `json:"error"`
 }
 
 func init() {
