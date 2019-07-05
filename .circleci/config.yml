@@ -5,7 +5,7 @@ notify:
 jobs:
   build:
     docker:
-      - image: synqfm/circleci:0.1.5
+      - image: synqfm/circleci:0.4.0-golang
     environment:
       REPO: "helpers"
       SYNQ_DIR: "/go/src/github.com/SYNQfm"
@@ -15,13 +15,9 @@ jobs:
       - run:
           name: "Download Dependencies"
           command: |
-            go get github.com/gin-gonic/gin
-            go get github.com/SYNQfm/SYNQ-Golang/synq
-            go get github.com/SYNQfm/SYNQ-Golang/test_server
-            go get github.com/stretchr/testify/assert
-            go get github.com/stretchr/testify/require
-            go get github.com/jmoiron/sqlx
-            go get github.com/buger/jsonparser
+            sudo chown  -R circleci:circleci "${SYNQ_DIR}"
+            go get github.com/kardianos/govendor
+            govendor sync
       - run:
           name: Run Golang Tests
           command: |
