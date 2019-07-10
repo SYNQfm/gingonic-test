@@ -101,3 +101,8 @@ func (e *Email) Send() error {
 
 	return nil
 }
+
+func (e *Email) SetMsgAndSend(message string) error {
+	e.Request.Message = message
+	return e.Send()
+}
