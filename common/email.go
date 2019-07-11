@@ -31,6 +31,7 @@ type EmailResponse struct {
 }
 
 func NewEmail() Email {
+	// set eris staging as default email url
 	serviceUrl := GetOsEnv("ERIS_URL", false, ERIS_STAGING_URL)
 	return Email{
 		EmailUrl: serviceUrl,
