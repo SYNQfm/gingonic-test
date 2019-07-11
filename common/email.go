@@ -11,9 +11,8 @@ import (
 
 const ERIS_STAGING_URL = "https://4oiv2vbc7l.execute-api.eu-central-1.amazonaws.com/stage/eris"
 
-var serviceUrl string
-
 type Email struct {
+	EmailUrl string
 	Request  EmailRequest
 	Response EmailResponse
 }
@@ -31,12 +30,10 @@ type EmailResponse struct {
 	Errors     map[string][]string `json:"error"`
 }
 
-func init() {
-	serviceUrl = GetOsEnv("ERIS_URL", false, ERIS_STAGING_URL)
-}
-
 func NewEmail() Email {
+	serviceUrl := GetOsEnv("ERIS_URL", false, ERIS_STAGING_URL)
 	return Email{
+		EmailUrl: serviceUrl,
 		Request:  EmailRequest{},
 		Response: EmailResponse{},
 	}
@@ -78,8 +75,8 @@ func (e *Email) Send() error {
 	b, _ := json.Marshal(e.Request)
 	body := bytes.NewBuffer(b)
 
-	fmt.Printf("[INFO][Send] Calling email service %s with values: %s\n", serviceUrl, string(b))
-	req, err := http.NewRequest("POST", serviceUrl, body)
+	fmt.Printf("[INFO][Send] Calling email service %s with values: %s\n", e.EmailUrl, string(b))
+	req, err := http.NewRequest("POST", e.EmailUrl, body)
 	if err != nil {
 		return fmt.Errorf("[Send] Error creating request %s: %s", string(b), err.Error())
 	}
