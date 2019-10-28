@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
+	"strings"
 )
 
 const ERIS_STAGING_URL = "https://4oiv2vbc7l.execute-api.eu-central-1.amazonaws.com/stage/eris"
@@ -106,6 +107,7 @@ func (e *Email) Send() error {
 }
 
 func (e *Email) SetMsgAndSend(message string) error {
+	message = strings.Replace(message, "\n", "<br>", -1)
 	e.Request.Message = message
 	return e.Send()
 }
