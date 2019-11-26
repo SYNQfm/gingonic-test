@@ -316,3 +316,12 @@ func GetMetadataStringVal(metadata json.RawMessage, field string) string {
 	valueBytes, _, _, _ := jsonparser.Get(metadata, field)
 	return string(valueBytes)
 }
+
+func ConvertArrayInterfaceToString(list []interface{}) (values []string) {
+	for _, item := range list {
+		if itemStr, ok := item.(string); ok {
+			values = append(values, itemStr)
+		}
+	}
+	return values
+}
